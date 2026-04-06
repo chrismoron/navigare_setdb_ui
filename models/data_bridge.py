@@ -126,6 +126,16 @@ class SetDBDataBridge(models.Model):
         return res
 
     @api.model
+    def _cron_auto_sync(self):
+        """Cron: auto-sync all scheduled bridges."""
+        bridges = self.search([('sync_mode', '=', 'scheduled'), ('active', '=', True)])
+        for bridge in bridges:
+            try:
+                bridge.action_sync()
+            except Exception:
+                _logger.exception('Auto-sync failed for bridge %s', bridge.name)
+
+    @api.model
     def _cron_sync_bridge(self, bridge_id):
         """Called by ir.cron to execute a scheduled sync."""
         bridge = self.browse(bridge_id)

@@ -372,3 +372,16 @@ class SetDBCubeCellCache(models.Model):
         'UNIQUE(cube_id, row_element_id, col_element_id, measure_id)',
         'Duplicate cell cache entry.',
     )
+
+    @api.model
+    def _cron_refresh_stale(self):
+        """Cron: recompute stale cell cache entries."""
+        stale = self.search([('is_stale', '=', True)], limit=500)
+        if not stale:
+            return
+        for cube in stale.mapped('cube_id'):
+            try:
+                cube.compute_grid()
+            except Exception:
+                pass
+        stale.write({'is_stale': False, 'computed_at': fields.Datetime.now()})
