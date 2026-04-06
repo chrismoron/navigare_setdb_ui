@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!--                       LIST VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_saved_query_list" model="ir.ui.view">
+        <field name="name">setdb.saved.query.list</field>
+        <field name="model">setdb.saved.query</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="query_text" widget="char"/>
+                <field name="author_id"/>
+                <field name="execution_count"/>
+                <field name="avg_execution_time_ms" string="Avg Time (ms)"/>
+                <field name="last_executed"/>
+                <field name="is_shared" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                       FORM VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_saved_query_form" model="ir.ui.view">
+        <field name="name">setdb.saved.query.form</field>
+        <field name="model">setdb.saved.query</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_execute" type="object" string="Execute"
+                            class="oe_highlight" icon="fa-play"/>
+                    <button name="action_open_schedule" type="object"
+                            string="Schedule" icon="fa-clock-o"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="author_id"/>
+                            <field name="tags"/>
+                        </group>
+                        <group>
+                            <field name="is_shared"/>
+                            <field name="shared_group_ids" widget="many2many_tags"
+                                   invisible="not is_shared"/>
+                            <field name="description"/>
+                        </group>
+                    </group>
+                    <separator string="Query"/>
+                    <field name="query_text" widget="ace" options="{'mode': 'sql'}"/>
+                    <separator string="Parameters Schema"/>
+                    <field name="parameters_json" widget="ace" options="{'mode': 'json'}"/>
+                    <notebook>
+                        <page string="Schedules">
+                            <field name="schedule_ids"/>
+                        </page>
+                        <page string="History">
+                            <field name="history_ids">
+                                <list>
+                                    <field name="executed_at"/>
+                                    <field name="user_id"/>
+                                    <field name="execution_time_ms"/>
+                                    <field name="result_count"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'success'"
+                                           decoration-danger="status == 'error'"/>
+                                    <field name="error_message" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                      SEARCH VIEW                             -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_saved_query_search" model="ir.ui.view">
+        <field name="name">setdb.saved.query.search</field>
+        <field name="model">setdb.saved.query</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="tags"/>
+                <filter string="Shared" name="shared"
+                        domain="[('is_shared', '=', True)]"/>
+                <filter string="My Queries" name="mine"
+                        domain="[('author_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Archived" name="archived"
+                        domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                       ACTION                                 -->
+    <!-- ============================================================ -->
+    <record id="action_setdb_saved_queries" model="ir.actions.act_window">
+        <field name="name">Saved Queries</field>
+        <field name="res_model">setdb.saved.query</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_setdb_saved_query_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first saved query
+            </p>
+        </field>
+    </record>
+
+    <!-- Scheduled queries action -->
+    <record id="action_setdb_scheduled_queries" model="ir.actions.act_window">
+        <field name="name">Scheduled Queries</field>
+        <field name="res_model">setdb.query.schedule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Query history action -->
+    <record id="action_setdb_query_history" model="ir.actions.act_window">
+        <field name="name">Query History</field>
+        <field name="res_model">setdb.query.history</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

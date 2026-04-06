@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!--                       LIST VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_cube_list" model="ir.ui.view">
+        <field name="name">setdb.cube.list</field>
+        <field name="model">setdb.cube</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="row_hierarchy_id"/>
+                <field name="column_hierarchy_id"/>
+                <field name="measure_ids" widget="many2many_tags"/>
+                <field name="author_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                       FORM VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_cube_form" model="ir.ui.view">
+        <field name="name">setdb.cube.form</field>
+        <field name="model">setdb.cube</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="compute_grid" type="object"
+                            string="Open in Cube Explorer"
+                            class="oe_highlight" icon="fa-th"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="description"/>
+                            <field name="row_hierarchy_id"/>
+                            <field name="column_hierarchy_id"/>
+                            <field name="filter_hierarchy_ids" widget="many2many_tags"/>
+                        </group>
+                        <group>
+                            <field name="show_row_totals"/>
+                            <field name="show_col_totals"/>
+                            <field name="show_grand_total"/>
+                            <field name="auto_materialize"/>
+                            <field name="default_row_depth"/>
+                            <field name="default_col_depth"/>
+                            <field name="author_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Measures">
+                            <field name="measure_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="metadata_key"/>
+                                    <field name="aggregation"/>
+                                    <field name="format_string"/>
+                                    <field name="sequence"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Formulas">
+                            <field name="formula_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="formula_text"/>
+                                    <field name="axis"/>
+                                    <field name="sequence"/>
+                                    <field name="style"/>
+                                    <field name="is_percentage"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                       ACTION                                 -->
+    <!-- ============================================================ -->
+    <record id="action_setdb_cubes" model="ir.actions.act_window">
+        <field name="name">Cube Definitions</field>
+        <field name="res_model">setdb.cube</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Define your first OLAP cube
+            </p>
+        </field>
+    </record>
+
+</odoo>

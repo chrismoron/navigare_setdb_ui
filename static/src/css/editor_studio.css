@@ -1,0 +1,54 @@
+/* SetDB Editor Studio Styles */
+.setdb-editor-studio {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: 100vh;
+}
+
+.setdb-editor-tree {
+    border-right: 1px solid var(--o-border-color, #dee2e6);
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.setdb-dag-canvas {
+    position: relative;
+    overflow: hidden;
+    background: #fafafa;
+    background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.setdb-dag-node {
+    cursor: move;
+    user-select: none;
+}
+
+.setdb-dag-node rect {
+    rx: 6;
+    ry: 6;
+    stroke: #333;
+    stroke-width: 1.5;
+}
+
+.setdb-dag-node.primitive rect { fill: #e8f5e9; stroke: #4caf50; }
+.setdb-dag-node.set rect { fill: #e3f2fd; stroke: #1976d2; }
+.setdb-dag-node.sequence rect { fill: #fff3e0; stroke: #ff9800; }
+
+.setdb-dag-node text {
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+.setdb-dag-edge {
+    stroke: #999;
+    stroke-width: 1.5;
+    fill: none;
+    marker-end: url(#arrowhead);
+}
+
+.setdb-dag-edge.selected {
+    stroke: #1976d2;
+    stroke-width: 2.5;
+}

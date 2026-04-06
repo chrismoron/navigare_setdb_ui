@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!--                       STUDIOS                                -->
+    <!-- ============================================================ -->
+    <menuitem id="setdb_ui_menu_studios"
+              name="Studios"
+              parent="setdb.setdb_menu_root"
+              sequence="50"/>
+
+    <menuitem id="setdb_ui_menu_query_studio"
+              name="Query Studio"
+              parent="setdb_ui_menu_studios"
+              action="action_setdb_saved_queries"
+              sequence="10"/>
+
+    <menuitem id="setdb_ui_menu_cube_explorer"
+              name="Cube Explorer"
+              parent="setdb_ui_menu_studios"
+              action="action_setdb_cubes"
+              sequence="20"/>
+
+    <menuitem id="setdb_ui_menu_editor_studio"
+              name="Editor Studio"
+              parent="setdb_ui_menu_studios"
+              action="action_setdb_saved_queries"
+              sequence="30"/>
+
+    <!-- ============================================================ -->
+    <!--                       OLAP                                   -->
+    <!-- ============================================================ -->
+    <menuitem id="setdb_ui_menu_olap"
+              name="OLAP"
+              parent="setdb.setdb_menu_root"
+              sequence="55"/>
+
+    <menuitem id="setdb_ui_menu_olap_cubes"
+              name="Cube Definitions"
+              parent="setdb_ui_menu_olap"
+              action="action_setdb_cubes"
+              sequence="10"/>
+
+    <menuitem id="setdb_ui_menu_olap_periods"
+              name="Period Configurations"
+              parent="setdb_ui_menu_olap"
+              action="action_setdb_period_configs"
+              sequence="20"/>
+
+    <!-- ============================================================ -->
+    <!--                   DATA INTEGRATION                           -->
+    <!-- ============================================================ -->
+    <menuitem id="setdb_ui_menu_integration"
+              name="Data Integration"
+              parent="setdb.setdb_menu_root"
+              sequence="60"/>
+
+    <menuitem id="setdb_ui_menu_integration_bridges"
+              name="Data Bridges"
+              parent="setdb_ui_menu_integration"
+              action="action_setdb_bridges"
+              sequence="10"/>
+
+    <menuitem id="setdb_ui_menu_integration_mail"
+              name="Mail Queries"
+              parent="setdb_ui_menu_integration"
+              action="action_setdb_mail_queries"
+              sequence="20"/>
+
+    <!-- ============================================================ -->
+    <!--                    SAVED QUERIES                             -->
+    <!-- ============================================================ -->
+    <menuitem id="setdb_ui_menu_queries"
+              name="Saved Queries"
+              parent="setdb.setdb_menu_root"
+              sequence="65"/>
+
+    <menuitem id="setdb_ui_menu_queries_all"
+              name="All Queries"
+              parent="setdb_ui_menu_queries"
+              action="action_setdb_saved_queries"
+              sequence="10"/>
+
+    <menuitem id="setdb_ui_menu_queries_scheduled"
+              name="Scheduled Queries"
+              parent="setdb_ui_menu_queries"
+              action="action_setdb_scheduled_queries"
+              sequence="20"/>
+
+    <menuitem id="setdb_ui_menu_queries_history"
+              name="Query History"
+              parent="setdb_ui_menu_queries"
+              action="action_setdb_query_history"
+              sequence="30"/>
+
+    <!-- ============================================================ -->
+    <!--                    CUSTOMIZATION                             -->
+    <!-- ============================================================ -->
+    <menuitem id="setdb_ui_menu_customization"
+              name="Customization"
+              parent="setdb.setdb_menu_root"
+              sequence="70"/>
+
+    <menuitem id="setdb_ui_menu_customization_profiles"
+              name="Profiles"
+              parent="setdb_ui_menu_customization"
+              action="action_setdb_ui_profiles"
+              sequence="10"/>
+
+    <menuitem id="setdb_ui_menu_customization_templates"
+              name="Templates"
+              parent="setdb_ui_menu_customization"
+              action="action_setdb_ui_templates"
+              sequence="20"/>
+
+    <!-- ============================================================ -->
+    <!--                    AI ASSISTANT                              -->
+    <!-- ============================================================ -->
+    <menuitem id="setdb_ui_menu_ai_assistant"
+              name="AI Assistant"
+              parent="setdb.setdb_menu_root"
+              action="action_setdb_saved_queries"
+              sequence="75"/>
+
+    <!-- ============================================================ -->
+    <!--                    CONFIGURATION                             -->
+    <!-- ============================================================ -->
+    <menuitem id="setdb_ui_menu_config"
+              name="Configuration"
+              parent="setdb.setdb_menu_root"
+              sequence="95"/>
+
+    <menuitem id="setdb_ui_menu_config_settings"
+              name="SetDB UI Settings"
+              parent="setdb_ui_menu_config"
+              action="action_setdb_ui_config"
+              sequence="10"/>
+
+</odoo>

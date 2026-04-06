@@ -1,0 +1,37 @@
+/* SetDB UI Studio — Common Styles */
+.setdb-studio-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--o-bg-color-200, #f8f9fa);
+}
+
+.setdb-panel {
+    border: 1px solid var(--o-border-color, #dee2e6);
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.setdb-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--o-border-color, #dee2e6);
+    background: white;
+}
+
+.setdb-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.setdb-badge-success { background: #d4edda; color: #155724; }
+.setdb-badge-info { background: #d1ecf1; color: #0c5460; }
+.setdb-badge-warning { background: #fff3cd; color: #856404; }
+.setdb-badge-danger { background: #f8d7da; color: #721c24; }

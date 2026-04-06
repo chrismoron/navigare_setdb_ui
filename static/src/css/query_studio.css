@@ -1,0 +1,62 @@
+/* SetDB Query Studio Styles */
+.setdb-query-studio {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+    gap: 0;
+}
+
+.setdb-query-sidebar {
+    grid-row: 1 / -1;
+    border-right: 1px solid var(--o-border-color, #dee2e6);
+    overflow-y: auto;
+    background: var(--o-bg-color-100, #fff);
+}
+
+.setdb-query-editor-area {
+    min-height: 300px;
+    position: relative;
+}
+
+.setdb-query-results-area {
+    border-top: 1px solid var(--o-border-color, #dee2e6);
+    max-height: 40vh;
+    overflow: auto;
+}
+
+.setdb-query-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.setdb-query-results-table th {
+    background: var(--o-bg-color-200, #f8f9fa);
+    padding: 6px 12px;
+    text-align: left;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.setdb-query-results-table td {
+    padding: 4px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.setdb-explain-tree {
+    padding: 16px;
+    font-family: monospace;
+    font-size: 0.85em;
+}
+
+.setdb-explain-node {
+    margin-left: 20px;
+    padding: 4px 0;
+}
+
+.setdb-explain-node::before {
+    content: '├── ';
+    color: #aaa;
+}

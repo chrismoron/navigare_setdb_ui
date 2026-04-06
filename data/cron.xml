@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Refresh stale cube cell cache — every 15 minutes -->
+    <record id="cron_setdb_refresh_stale_cache" model="ir.cron">
+        <field name="name">SetDB: Refresh Stale Cube Cell Cache</field>
+        <field name="model_id" ref="model_setdb_cube_cell_cache"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_refresh_stale()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <!-- Auto-update bridge sync — every 6 hours -->
+    <record id="cron_setdb_auto_bridge_sync" model="ir.cron">
+        <field name="name">SetDB: Auto-Update Bridge Sync</field>
+        <field name="model_id" ref="model_setdb_data_bridge"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_auto_sync()</field>
+        <field name="interval_number">6</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+    </record>
+
+</odoo>

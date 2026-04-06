@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!--                       LIST VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_bridge_list" model="ir.ui.view">
+        <field name="name">setdb.data.bridge.list</field>
+        <field name="model">setdb.data.bridge</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="source_model_id"/>
+                <field name="sync_mode" widget="badge"/>
+                <field name="last_sync"/>
+                <field name="last_sync_count"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                       FORM VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_bridge_form" model="ir.ui.view">
+        <field name="name">setdb.data.bridge.form</field>
+        <field name="model">setdb.data.bridge</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_sync" type="object"
+                            string="Sync Now" class="oe_highlight" icon="fa-refresh"/>
+                    <button name="action_preview" type="object"
+                            string="Preview" icon="fa-eye"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="source_model_id"/>
+                            <field name="domain_filter"/>
+                            <field name="sync_mode"/>
+                        </group>
+                        <group>
+                            <field name="interval_number"
+                                   invisible="sync_mode != 'scheduled'"/>
+                            <field name="interval_type"
+                                   invisible="sync_mode != 'scheduled'"/>
+                            <field name="last_sync" readonly="1"/>
+                            <field name="last_sync_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Mappings">
+                            <field name="mapping_ids">
+                                <list editable="bottom">
+                                    <field name="source_field_id"
+                                           domain="[('model_id', '=', parent.source_model_id)]"/>
+                                    <field name="mapping_type"/>
+                                    <field name="metadata_key"
+                                           invisible="mapping_type != 'metadata'"/>
+                                    <field name="sequence"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Dimensions">
+                            <field name="dimension_ids">
+                                <list editable="bottom">
+                                    <field name="odoo_field_id"/>
+                                    <field name="target_hierarchy_id"/>
+                                    <field name="period_config_id"/>
+                                    <field name="auto_create_hierarchy"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                       ACTION                                 -->
+    <!-- ============================================================ -->
+    <record id="action_setdb_bridges" model="ir.actions.act_window">
+        <field name="name">Data Bridges</field>
+        <field name="res_model">setdb.data.bridge</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first data bridge
+            </p>
+        </field>
+    </record>
+
+</odoo>

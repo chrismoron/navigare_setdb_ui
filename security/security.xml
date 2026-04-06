@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Reuse SetDB groups from parent module -->
+        <!-- group_setdb_user and group_setdb_manager are defined in setdb module -->
+    </data>
+</odoo>

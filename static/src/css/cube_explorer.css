@@ -1,0 +1,159 @@
+/* SetDB Cube Explorer Styles */
+.setdb-cube-explorer {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.setdb-cube-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: white;
+    border-bottom: 1px solid var(--o-border-color, #dee2e6);
+    flex-wrap: wrap;
+}
+
+.setdb-cube-grid-container {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+}
+
+.setdb-cube-grid {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: max-content;
+}
+
+.setdb-cube-grid th {
+    background: var(--o-bg-color-200, #f0f0f0);
+    padding: 6px 12px;
+    font-weight: 600;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border: 1px solid #ddd;
+    white-space: nowrap;
+}
+
+.setdb-cube-grid th.row-header {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: #e8eaed;
+}
+
+.setdb-cube-grid th.corner {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    background: #d5d7da;
+}
+
+.setdb-cube-grid td {
+    padding: 4px 12px;
+    text-align: right;
+    border: 1px solid #eee;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.setdb-cube-grid td.row-header {
+    text-align: left;
+    font-weight: 500;
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 5;
+}
+
+.setdb-cube-grid tr.total-row td,
+.setdb-cube-grid tr.total-row th {
+    font-weight: 700;
+    background: #e3f2fd;
+    border-top: 2px solid #1976d2;
+}
+
+.setdb-cube-grid td.total-col {
+    font-weight: 700;
+    background: #e3f2fd;
+    border-left: 2px solid #1976d2;
+}
+
+.setdb-cube-grid td.grand-total {
+    font-weight: 700;
+    background: #bbdefb;
+}
+
+/* Drill-down indicators */
+.setdb-cube-expandable {
+    cursor: pointer;
+}
+
+.setdb-cube-expandable::before {
+    content: '▶ ';
+    font-size: 0.7em;
+    color: #666;
+}
+
+.setdb-cube-expanded::before {
+    content: '▼ ';
+}
+
+.setdb-cube-depth-1 { padding-left: 24px !important; }
+.setdb-cube-depth-2 { padding-left: 48px !important; }
+.setdb-cube-depth-3 { padding-left: 72px !important; }
+
+/* Conditional formatting */
+.setdb-cell-heat-1 { background: #fff5f5; }
+.setdb-cell-heat-2 { background: #ffe0e0; }
+.setdb-cell-heat-3 { background: #ffc0c0; }
+.setdb-cell-heat-4 { background: #ff9090; }
+.setdb-cell-heat-5 { background: #ff6060; color: white; }
+
+/* Formula rows */
+.setdb-formula-row td { font-style: italic; background: #fffde7; }
+.setdb-formula-row.bold td { font-weight: 700; }
+.setdb-separator-row td { border-bottom: 2px solid #333; height: 4px; padding: 0; }
+
+/* Dimension picker */
+.setdb-dimension-picker {
+    display: flex;
+    gap: 16px;
+    padding: 12px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+}
+
+.setdb-dimension-zone {
+    flex: 1;
+    min-height: 40px;
+    padding: 8px;
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.setdb-dimension-zone.drag-over {
+    border-color: #1976d2;
+    background: #e3f2fd;
+}
+
+.setdb-dimension-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    background: #1976d2;
+    color: white;
+    border-radius: 16px;
+    font-size: 0.85em;
+    cursor: grab;
+}
