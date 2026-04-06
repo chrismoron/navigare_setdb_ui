@@ -50,6 +50,9 @@ smart materialization suggestions, and auto-tuning.
         'views/menu.xml',
         'data/cron.xml',
     ],
+    'demo': [
+        'data/demo.xml',
+    ],
     'assets': {
         'web.assets_backend': [
             # CSS

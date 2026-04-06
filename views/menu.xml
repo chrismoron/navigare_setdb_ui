@@ -2,6 +2,29 @@
 <odoo>
 
     <!-- ============================================================ -->
+    <!--                  CLIENT ACTIONS                              -->
+    <!-- ============================================================ -->
+    <record id="action_setdb_query_studio" model="ir.actions.client">
+        <field name="name">Query Studio</field>
+        <field name="tag">setdb_query_studio</field>
+    </record>
+
+    <record id="action_setdb_cube_explorer" model="ir.actions.client">
+        <field name="name">Cube Explorer</field>
+        <field name="tag">setdb_cube_explorer</field>
+    </record>
+
+    <record id="action_setdb_editor_studio" model="ir.actions.client">
+        <field name="name">Editor Studio</field>
+        <field name="tag">setdb_editor_studio</field>
+    </record>
+
+    <record id="action_setdb_dashboard" model="ir.actions.client">
+        <field name="name">SetDB Dashboard</field>
+        <field name="tag">setdb_dashboard</field>
+    </record>
+
+    <!-- ============================================================ -->
     <!--                       STUDIOS                                -->
     <!-- ============================================================ -->
     <menuitem id="setdb_ui_menu_studios"
@@ -12,19 +35,19 @@
     <menuitem id="setdb_ui_menu_query_studio"
               name="Query Studio"
               parent="setdb_ui_menu_studios"
-              action="action_setdb_saved_queries"
+              action="action_setdb_query_studio"
               sequence="10"/>
 
     <menuitem id="setdb_ui_menu_cube_explorer"
               name="Cube Explorer"
               parent="setdb_ui_menu_studios"
-              action="action_setdb_cubes"
+              action="action_setdb_cube_explorer"
               sequence="20"/>
 
     <menuitem id="setdb_ui_menu_editor_studio"
               name="Editor Studio"
               parent="setdb_ui_menu_studios"
-              action="action_setdb_saved_queries"
+              action="action_setdb_editor_studio"
               sequence="30"/>
 
     <!-- ============================================================ -->
@@ -119,8 +142,15 @@
     <menuitem id="setdb_ui_menu_ai_assistant"
               name="AI Assistant"
               parent="setdb.setdb_menu_root"
-              action="action_setdb_saved_queries"
+              action="action_setdb_query_studio"
               sequence="75"/>
+
+    <!-- Dashboard -->
+    <menuitem id="setdb_ui_menu_dashboard"
+              name="Dashboard"
+              parent="setdb.setdb_menu_root"
+              action="action_setdb_dashboard"
+              sequence="5"/>
 
     <!-- ============================================================ -->
     <!--                    CONFIGURATION                             -->

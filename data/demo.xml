@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- Period Configuration: 2025-2026 (monthly)                    -->
+        <!-- ============================================================ -->
+
+        <record id="demo_period_config_2025_2026" model="setdb.period.config">
+            <field name="name">FY 2025-2026</field>
+            <field name="fiscal_year_start_month">1</field>
+            <field name="year_start">2025</field>
+            <field name="year_end">2026</field>
+            <field name="generate_months">True</field>
+            <field name="generate_quarters">True</field>
+            <field name="generate_weeks">False</field>
+            <field name="generate_days">False</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Sample Cube: Accounting x Period                             -->
+        <!-- Uses setdb demo hierarchy (accounting_hierarchy)             -->
+        <!-- Period hierarchy will be created after period generation      -->
+        <!-- For demo we reference the accounting hierarchy for both axes -->
+        <!-- ============================================================ -->
+
+        <record id="demo_cube_accounting" model="setdb.cube">
+            <field name="name">Accounting Analysis</field>
+            <field name="description">Sample OLAP cube: rows=accounting hierarchy, columns=accounting hierarchy (replace column with period hierarchy after generation)</field>
+            <field name="row_hierarchy_id" ref="setdb.hierarchy_accounting"/>
+            <field name="column_hierarchy_id" ref="setdb.hierarchy_accounting"/>
+            <field name="show_row_totals">True</field>
+            <field name="show_col_totals">True</field>
+            <field name="show_grand_total">True</field>
+            <field name="default_row_depth">1</field>
+            <field name="default_col_depth">1</field>
+            <field name="auto_materialize">True</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Sample Measure: Count aggregation                            -->
+        <!-- ============================================================ -->
+
+        <record id="demo_measure_count" model="setdb.cube.measure">
+            <field name="cube_id" ref="demo_cube_accounting"/>
+            <field name="name">Element Count</field>
+            <field name="metadata_key">description</field>
+            <field name="aggregation">count</field>
+            <field name="format_string">#,##0</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Sample Saved Query: FLATTEN plan_kont                        -->
+        <!-- ============================================================ -->
+
+        <record id="demo_saved_query_flatten" model="setdb.saved.query">
+            <field name="name">Flatten Plan Kont</field>
+            <field name="query_text">FLATTEN plan_kont</field>
+            <field name="description">Flattens the entire chart-of-accounts hierarchy to retrieve all primitive account elements.</field>
+            <field name="is_shared">True</field>
+            <field name="tags">demo,accounting,flatten</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Sample Template: Query template for accounting lookups       -->
+        <!-- ============================================================ -->
+
+        <record id="demo_template_accounting_query" model="setdb.ui.template">
+            <field name="name">Accounting Flatten Query</field>
+            <field name="template_type">query</field>
+            <field name="description">Template for creating a FLATTEN query on the accounting plan hierarchy.</field>
+            <field name="tags">demo,accounting,template</field>
+            <field name="is_system">True</field>
+            <field name="config_json">{
+    "name": "Flatten ${hierarchy}",
+    "query_text": "FLATTEN ${hierarchy}",
+    "description": "Flatten a hierarchy to its primitives",
+    "parameters": [
+        {"name": "hierarchy", "type": "text", "label": "Hierarchy Name", "default": "plan_kont"}
+    ]
+}</field>
+        </record>
+
+    </data>
+</odoo>
