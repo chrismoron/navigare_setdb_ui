@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- ================================================================== -->
+    <!-- SetDBCubeExplorer — main client action                             -->
+    <!-- ================================================================== -->
+    <t t-name="setdb_ui.CubeExplorer">
+        <div class="setdb-cube-explorer">
+            <!-- Toolbar -->
+            <SetDBCubeToolbar
+                cubes="state.available_cubes"
+                selected_cube_id="state.cube_id"
+                onCubeChange.bind="onCubeChange"
+                onPivot.bind="pivotAxes"
+                onExport.bind="exportGrid"
+                onRefresh.bind="loadGrid"
+            />
+
+            <!-- Dimension picker (collapsible) -->
+            <t t-if="state.show_dimension_picker">
+                <SetDBDimensionPicker
+                    available_hierarchies="state.available_hierarchies"
+                    row_hierarchy="state.row_hierarchy"
+                    col_hierarchy="state.col_hierarchy"
+                    filter_hierarchies="state.filter_hierarchies"
+                    onRowChange.bind="onRowHierarchyChange"
+                    onColChange.bind="onColHierarchyChange"
+                    onFilterChange.bind="onFilterHierarchyChange"
+                />
+            </t>
+
+            <!-- Measure picker row -->
+            <t t-if="state.selected_measures.length">
+                <div class="d-flex align-items-center px-3 py-2 bg-white border-bottom gap-2">
+                    <SetDBMeasurePicker
+                        measures="state.selected_measures"
+                        selected_measure_id="state.selected_measure_id"
+                        onMeasureChange.bind="onMeasureChange"
+                    />
+                    <button class="btn btn-sm btn-outline-secondary ms-auto"
+                            t-on-click="toggleDimensionPicker"
+                            title="Toggle dimension picker">
+                        <i class="fa fa-sliders"/> Dimensions
+                    </button>
+                </div>
+            </t>
+
+            <!-- Loading overlay -->
+            <t t-if="state.is_loading">
+                <div class="d-flex justify-content-center align-items-center p-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="ms-3 text-muted">Computing grid...</span>
+                </div>
+            </t>
+
+            <!-- Grid area -->
+            <t t-if="!state.is_loading and state.grid_data">
+                <div class="setdb-cube-grid-container">
+                    <SetDBCubeGrid
+                        grid_data="state.grid_data"
+                        measures="state.selected_measures"
+                        onDrillDown.bind="drillDown"
+                        onRollUp.bind="rollUp"
+                        showRowTotals="true"
+                        showColTotals="true"
+                        showGrandTotal="true"
+                    />
+                </div>
+            </t>
+
+            <!-- Empty state -->
+            <t t-if="!state.is_loading and !state.grid_data and state.cube_id">
+                <div class="d-flex flex-column align-items-center justify-content-center p-5 text-muted">
+                    <i class="fa fa-cube fa-3x mb-3"/>
+                    <p>No data available for this cube.</p>
+                </div>
+            </t>
+
+            <!-- No cube selected -->
+            <t t-if="!state.is_loading and !state.cube_id">
+                <div class="d-flex flex-column align-items-center justify-content-center p-5 text-muted" style="flex:1;">
+                    <i class="fa fa-th fa-4x mb-3 text-primary opacity-50"/>
+                    <h5>SetDB OLAP Cube Explorer</h5>
+                    <p>Select a cube from the toolbar to begin.</p>
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <!-- ================================================================== -->
+    <!-- SetDBCubeToolbar                                                    -->
+    <!-- ================================================================== -->
+    <t t-name="setdb_ui.CubeToolbar">
+        <div class="setdb-cube-toolbar">
+            <!-- Cube selector -->
+            <div class="d-flex align-items-center gap-2">
+                <label class="fw-bold text-nowrap mb-0">
+                    <i class="fa fa-cube me-1"/> Cube:
+                </label>
+                <select class="form-select form-select-sm" style="min-width:200px;"
+                        t-on-change="onCubeSelect">
+                    <option value="">-- Select cube --</option>
+                    <t t-foreach="props.cubes" t-as="cube" t-key="cube.id">
+                        <option t-att-value="cube.id"
+                                t-att-selected="cube.id === props.selected_cube_id">
+                            <t t-esc="cube.name"/>
+                        </option>
+                    </t>
+                </select>
+            </div>
+
+            <!-- Spacer -->
+            <div class="flex-grow-1"/>
+
+            <!-- Action buttons -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-outline-primary" t-on-click="onPivotClick"
+                        title="Swap rows and columns">
+                    <i class="fa fa-exchange"/> Pivot
+                </button>
+                <button class="btn btn-outline-primary" t-on-click="onRefreshClick"
+                        title="Refresh grid data">
+                    <i class="fa fa-refresh"/> Refresh
+                </button>
+            </div>
+            <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-outline-secondary" t-on-click="onExportExcel"
+                        title="Export as Excel-compatible TSV">
+                    <i class="fa fa-file-excel-o"/> Excel
+                </button>
+                <button class="btn btn-outline-secondary" t-on-click="onExportCSV"
+                        title="Export as CSV">
+                    <i class="fa fa-file-text-o"/> CSV
+                </button>
+            </div>
+        </div>
+    </t>
+
+    <!-- ================================================================== -->
+    <!-- SetDBMeasurePicker                                                  -->
+    <!-- ================================================================== -->
+    <t t-name="setdb_ui.MeasurePicker">
+        <div class="d-flex align-items-center gap-2">
+            <label class="fw-bold text-nowrap mb-0">
+                <i class="fa fa-bar-chart me-1"/> Measure:
+            </label>
+            <select class="form-select form-select-sm" style="min-width:180px;"
+                    t-on-change="onMeasureSelect">
+                <t t-foreach="props.measures" t-as="m" t-key="m.id">
+                    <option t-att-value="m.id"
+                            t-att-selected="m.id === props.selected_measure_id">
+                        <t t-esc="m.name"/>
+                        <t t-if="m.aggregation">
+                            (<t t-esc="aggLabel(m.aggregation)"/>)
+                        </t>
+                    </option>
+                </t>
+            </select>
+        </div>
+    </t>
+
+    <!-- ================================================================== -->
+    <!-- SetDBDimensionPicker                                                -->
+    <!-- ================================================================== -->
+    <t t-name="setdb_ui.DimensionPicker">
+        <div class="setdb-dimension-picker">
+            <!-- Row zone -->
+            <div class="setdb-dimension-zone">
+                <span class="text-muted small fw-bold me-2">
+                    <i class="fa fa-arrows-h"/> Rows
+                </span>
+                <t t-if="props.row_hierarchy">
+                    <span class="setdb-dimension-chip">
+                        <t t-esc="props.row_hierarchy.name"/>
+                        <i class="fa fa-times ms-2" style="cursor:pointer;"
+                           t-on-click="clearRow"/>
+                    </span>
+                </t>
+                <t t-else="">
+                    <select class="form-select form-select-sm" style="max-width:180px;"
+                            t-on-change="onRowSelect">
+                        <option value="">+ Add hierarchy</option>
+                        <t t-foreach="unassigned" t-as="h" t-key="h.id">
+                            <option t-att-value="h.id"><t t-esc="h.name"/></option>
+                        </t>
+                    </select>
+                </t>
+            </div>
+
+            <!-- Column zone -->
+            <div class="setdb-dimension-zone">
+                <span class="text-muted small fw-bold me-2">
+                    <i class="fa fa-arrows-v"/> Columns
+                </span>
+                <t t-if="props.col_hierarchy">
+                    <span class="setdb-dimension-chip">
+                        <t t-esc="props.col_hierarchy.name"/>
+                        <i class="fa fa-times ms-2" style="cursor:pointer;"
+                           t-on-click="clearCol"/>
+                    </span>
+                </t>
+                <t t-else="">
+                    <select class="form-select form-select-sm" style="max-width:180px;"
+                            t-on-change="onColSelect">
+                        <option value="">+ Add hierarchy</option>
+                        <t t-foreach="unassigned" t-as="h" t-key="h.id">
+                            <option t-att-value="h.id"><t t-esc="h.name"/></option>
+                        </t>
+                    </select>
+                </t>
+            </div>
+
+            <!-- Filter zone -->
+            <div class="setdb-dimension-zone">
+                <span class="text-muted small fw-bold me-2">
+                    <i class="fa fa-filter"/> Filters
+                </span>
+                <t t-foreach="props.filter_hierarchies or []" t-as="fh" t-key="fh.id">
+                    <span class="setdb-dimension-chip">
+                        <t t-esc="fh.name"/>
+                        <i class="fa fa-times ms-2" style="cursor:pointer;"
+                           t-on-click="() => this.removeFilter(fh.id)"/>
+                    </span>
+                </t>
+                <select class="form-select form-select-sm" style="max-width:160px;"
+                        t-on-change="onAddFilter">
+                    <option value="">+ Add filter</option>
+                    <t t-foreach="unassigned" t-as="h" t-key="h.id">
+                        <option t-att-value="h.id"><t t-esc="h.name"/></option>
+                    </t>
+                </select>
+            </div>
+        </div>
+    </t>
+
+    <!-- ================================================================== -->
+    <!-- SetDBCubeGrid — the OLAP pivot table                               -->
+    <!-- ================================================================== -->
+    <t t-name="setdb_ui.CubeGrid">
+        <t t-if="hasData">
+            <table class="setdb-cube-grid">
+                <thead>
+                    <tr>
+                        <!-- Corner cell -->
+                        <th class="corner"/>
+
+                        <!-- Column headers -->
+                        <t t-foreach="columns" t-as="col" t-key="col.id">
+                            <th t-att-class="expandClass(col)"
+                                t-on-click="() => this.onColHeaderClick(col)"
+                                t-att-title="col.name">
+                                <t t-esc="col.name"/>
+                            </th>
+                        </t>
+
+                        <!-- Row-total header -->
+                        <t t-if="props.showRowTotals">
+                            <th class="total-col">Total</th>
+                        </t>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data rows -->
+                    <t t-foreach="rows" t-as="row" t-key="row.id">
+                        <tr>
+                            <!-- Row header -->
+                            <td t-att-class="'row-header ' + depthClass(row.depth) + ' ' + expandClass(row)"
+                                t-on-click="() => this.onRowHeaderClick(row)">
+                                <t t-esc="row.name"/>
+                            </td>
+
+                            <!-- Data cells -->
+                            <t t-foreach="columns" t-as="col" t-key="col.id">
+                                <td t-att-class="heatClass(cellValue(row.id, col.id))">
+                                    <SetDBCubeCell
+                                        value="cellValue(row.id, col.id)"
+                                        intersection_count="cellIntersectionCount(row.id, col.id)"
+                                    />
+                                </td>
+                            </t>
+
+                            <!-- Row total -->
+                            <t t-if="props.showRowTotals">
+                                <td class="total-col">
+                                    <SetDBCubeCell value="rowTotalValue(row.id)"/>
+                                </td>
+                            </t>
+                        </tr>
+                    </t>
+
+                    <!-- Formula rows -->
+                    <t t-foreach="formulaList" t-as="formula" t-key="formula.id">
+                        <tr t-att-class="formulaRowClass(formula)">
+                            <td class="row-header">
+                                <t t-esc="formula.name"/>
+                            </td>
+                            <t t-foreach="columns" t-as="col" t-key="col.id">
+                                <td>
+                                    <SetDBCubeCell
+                                        value="formulaValue(formula.id, col.id)"
+                                        format_string="formula.is_percentage ? '0.00%' : '#,##0.00'"
+                                    />
+                                </td>
+                            </t>
+                            <t t-if="props.showRowTotals">
+                                <td class="total-col"/>
+                            </t>
+                        </tr>
+                    </t>
+
+                    <!-- Column totals row -->
+                    <t t-if="props.showColTotals">
+                        <tr class="total-row">
+                            <th class="row-header">Total</th>
+                            <t t-foreach="columns" t-as="col" t-key="col.id">
+                                <td>
+                                    <SetDBCubeCell value="colTotalValue(col.id)"/>
+                                </td>
+                            </t>
+                            <!-- Grand total -->
+                            <t t-if="props.showRowTotals and props.showGrandTotal">
+                                <td class="grand-total">
+                                    <SetDBCubeCell value="grandTotalValue"/>
+                                </td>
+                            </t>
+                            <t t-elif="props.showRowTotals">
+                                <td class="total-col"/>
+                            </t>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </t>
+
+        <!-- Empty grid message -->
+        <t t-if="!hasData">
+            <div class="d-flex flex-column align-items-center justify-content-center p-5 text-muted">
+                <i class="fa fa-table fa-3x mb-3 opacity-50"/>
+                <p>No rows or columns to display. Check cube configuration.</p>
+            </div>
+        </t>
+    </t>
+
+    <!-- ================================================================== -->
+    <!-- SetDBCubeCell                                                       -->
+    <!-- ================================================================== -->
+    <t t-name="setdb_ui.CubeCell">
+        <span t-att-class="heatClass"
+              t-att-title="tooltipText">
+            <t t-esc="formattedValue"/>
+        </span>
+    </t>
+
+</templates>

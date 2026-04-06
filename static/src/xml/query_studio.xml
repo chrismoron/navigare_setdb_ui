@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- ================================================================
+         QueryStudio — Main client action layout
+         ================================================================ -->
+    <t t-name="setdb_ui.QueryStudio">
+        <div class="setdb-query-studio">
+            <!-- ===== SIDEBAR ===== -->
+            <div class="setdb-query-sidebar d-flex flex-column">
+                <!-- Sidebar tab switcher -->
+                <div class="d-flex border-bottom">
+                    <button class="btn btn-link flex-fill rounded-0 py-2"
+                            t-att-class="{ 'fw-bold border-bottom border-primary border-2': state.sidebar_tab === 'saved' }"
+                            t-on-click="() => this.setSidebarTab('saved')">
+                        <i class="fa fa-save me-1"/>Saved
+                    </button>
+                    <button class="btn btn-link flex-fill rounded-0 py-2"
+                            t-att-class="{ 'fw-bold border-bottom border-primary border-2': state.sidebar_tab === 'history' }"
+                            t-on-click="() => this.setSidebarTab('history')">
+                        <i class="fa fa-history me-1"/>History
+                    </button>
+                </div>
+
+                <!-- Saved queries panel -->
+                <div t-if="state.sidebar_tab === 'saved'" class="flex-grow-1 overflow-auto">
+                    <div class="p-2">
+                        <button class="btn btn-sm btn-outline-primary w-100 mb-2" t-on-click="clearEditor">
+                            <i class="fa fa-plus me-1"/>New Query
+                        </button>
+                    </div>
+                    <div t-if="state.saved_queries.length === 0" class="text-muted text-center p-3 small">
+                        No saved queries yet.
+                    </div>
+                    <div t-foreach="state.saved_queries" t-as="sq" t-key="sq.id"
+                         class="px-2 py-1">
+                        <div class="d-flex align-items-start border rounded p-2 mb-1 setdb-saved-query-item"
+                             t-att-class="{ 'border-primary bg-primary bg-opacity-10': state.selected_query_id === sq.id }"
+                             t-on-click="() => this.loadQuery(sq)"
+                             role="button">
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="fw-semibold text-truncate small" t-esc="sq.name"/>
+                                <div t-if="sq.description" class="text-muted text-truncate" style="font-size: 0.75em;" t-esc="sq.description"/>
+                                <div class="d-flex gap-2 mt-1" style="font-size: 0.7em;">
+                                    <span t-if="sq.execution_count" class="text-muted">
+                                        <i class="fa fa-play-circle me-1"/><t t-esc="sq.execution_count"/>x
+                                    </span>
+                                    <span t-if="sq.tags" class="text-muted">
+                                        <i class="fa fa-tags me-1"/><t t-esc="sq.tags"/>
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-link text-danger p-0 ms-1"
+                                    t-on-click.stop="() => this.deleteQuery(sq.id)"
+                                    title="Delete">
+                                <i class="fa fa-trash"/>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History panel -->
+                <div t-if="state.sidebar_tab === 'history'" class="flex-grow-1 overflow-auto">
+                    <SetDBQueryHistory history="state.history" onSelect.bind="onHistorySelect"/>
+                </div>
+            </div>
+
+            <!-- ===== MAIN AREA ===== -->
+            <div class="d-flex flex-column overflow-hidden">
+                <!-- Toolbar -->
+                <div class="setdb-query-toolbar d-flex align-items-center gap-2 px-3 py-2 border-bottom bg-light">
+                    <span class="fw-semibold me-2">
+                        <i class="fa fa-terminal me-1"/>
+                        <t t-esc="currentQueryName"/>
+                        <span t-if="hasUnsavedChanges" class="text-warning ms-1" title="Unsaved changes">*</span>
+                    </span>
+                    <div class="flex-grow-1"/>
+                    <button class="btn btn-sm btn-success" t-on-click="executeQuery" t-att-disabled="state.is_loading">
+                        <i class="fa fa-play me-1"/>
+                        <t t-if="state.is_loading">Running...</t>
+                        <t t-else="">Execute</t>
+                        <span class="ms-1 badge bg-light text-dark" style="font-size: 0.7em;">Ctrl+Enter</span>
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" t-on-click="explainQuery" t-att-disabled="state.is_loading">
+                        <i class="fa fa-sitemap me-1"/>Explain
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" t-on-click="openSaveDialog">
+                        <i class="fa fa-save me-1"/>Save
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" t-on-click="clearEditor">
+                        <i class="fa fa-file-o me-1"/>New
+                    </button>
+                </div>
+
+                <!-- Editor area -->
+                <div class="setdb-query-editor-area flex-shrink-0">
+                    <SetDBQueryEditor
+                        value="state.query_text"
+                        onChange.bind="onQueryChange"
+                        onExecute.bind="executeQuery"/>
+                </div>
+
+                <!-- Bottom tabs -->
+                <div class="border-top d-flex flex-column flex-grow-1 overflow-hidden">
+                    <!-- Tab headers -->
+                    <div class="d-flex border-bottom bg-light">
+                        <button class="btn btn-sm btn-link rounded-0 px-3 py-1"
+                                t-att-class="{ 'fw-bold border-bottom border-primary border-2': state.active_tab === 'results' }"
+                                t-on-click="() => this.setActiveTab('results')">
+                            <i class="fa fa-table me-1"/>Results
+                            <span t-if="state.result_count > 0" class="badge bg-secondary ms-1" t-esc="state.result_count"/>
+                        </button>
+                        <button class="btn btn-sm btn-link rounded-0 px-3 py-1"
+                                t-att-class="{ 'fw-bold border-bottom border-primary border-2': state.active_tab === 'explain' }"
+                                t-on-click="() => this.setActiveTab('explain')">
+                            <i class="fa fa-sitemap me-1"/>Explain
+                        </button>
+                        <button class="btn btn-sm btn-link rounded-0 px-3 py-1"
+                                t-att-class="{ 'fw-bold border-bottom border-primary border-2': state.active_tab === 'builder' }"
+                                t-on-click="() => this.setActiveTab('builder')">
+                            <i class="fa fa-wrench me-1"/>Query Builder
+                        </button>
+                    </div>
+
+                    <!-- Tab content -->
+                    <div class="setdb-query-results-area flex-grow-1 overflow-auto">
+                        <!-- Loading overlay -->
+                        <div t-if="state.is_loading" class="d-flex align-items-center justify-content-center p-5">
+                            <div class="spinner-border text-primary me-2" role="status"/>
+                            <span class="text-muted">Executing query...</span>
+                        </div>
+
+                        <!-- Error message -->
+                        <div t-if="state.error_message and !state.is_loading" class="alert alert-danger m-3">
+                            <i class="fa fa-exclamation-triangle me-2"/>
+                            <strong>Error: </strong>
+                            <span t-esc="state.error_message"/>
+                        </div>
+
+                        <!-- Results tab -->
+                        <t t-if="state.active_tab === 'results' and !state.is_loading">
+                            <t t-if="state.results.length > 0">
+                                <SetDBQueryResults
+                                    results="state.results"
+                                    execution_time_ms="state.execution_time_ms"
+                                    result_count="state.result_count"/>
+                            </t>
+                            <div t-elif="!state.error_message" class="text-muted text-center p-5">
+                                <i class="fa fa-database fa-3x mb-3 d-block opacity-25"/>
+                                <p>Run a query to see results here.</p>
+                                <p class="small">Press <kbd>Ctrl+Enter</kbd> to execute, <kbd>Ctrl+Space</kbd> for autocomplete.</p>
+                            </div>
+                        </t>
+
+                        <!-- Explain tab -->
+                        <t t-if="state.active_tab === 'explain' and !state.is_loading">
+                            <t t-if="state.execution_plan">
+                                <SetDBExplainViewer plan_text="state.execution_plan"/>
+                            </t>
+                            <div t-else="" class="text-muted text-center p-5">
+                                <i class="fa fa-sitemap fa-3x mb-3 d-block opacity-25"/>
+                                <p>Click "Explain" to see the execution plan for your query.</p>
+                            </div>
+                        </t>
+
+                        <!-- Builder tab -->
+                        <t t-if="state.active_tab === 'builder'">
+                            <SetDBQueryBuilder onQueryGenerated.bind="onQueryGenerated"/>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SAVE DIALOG (Modal) ===== -->
+            <div t-if="state.save_dialog_open" class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fa fa-save me-2"/>
+                                <t t-if="state.selected_query_id">Update Query</t>
+                                <t t-else="">Save Query</t>
+                            </h5>
+                            <button type="button" class="btn-close" t-on-click="closeSaveDialog"/>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Name</label>
+                                <input type="text" class="form-control"
+                                       t-att-value="state.save_name"
+                                       t-on-input="onSaveNameChange"
+                                       placeholder="e.g. Monthly Revenue by Region"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Description (optional)</label>
+                                <textarea class="form-control" rows="2"
+                                          t-att-value="state.save_description"
+                                          t-on-input="onSaveDescriptionChange"
+                                          placeholder="Brief description of what this query does"/>
+                            </div>
+                            <div class="bg-light rounded p-2">
+                                <label class="form-label small text-muted mb-1">Query Preview</label>
+                                <pre class="mb-0 small" style="max-height: 100px; overflow: auto;" t-esc="state.query_text"/>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" t-on-click="closeSaveDialog">Cancel</button>
+                            <button class="btn btn-primary" t-on-click="saveQuery">
+                                <i class="fa fa-save me-1"/>
+                                <t t-if="state.selected_query_id">Update</t>
+                                <t t-else="">Save</t>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- ================================================================
+         QueryEditor — Textarea with syntax highlighting overlay
+         ================================================================ -->
+    <t t-name="setdb_ui.QueryEditor">
+        <div class="setdb-editor-container position-relative w-100 h-100" style="min-height: 250px;">
+            <!-- Syntax highlight backdrop -->
+            <pre class="setdb-editor-highlight position-absolute top-0 start-0 w-100 h-100 m-0 p-3 overflow-hidden"
+                 t-ref="highlight"
+                 style="pointer-events: none; font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; line-height: 20px; white-space: pre-wrap; word-wrap: break-word; color: transparent; background: transparent; border: none; z-index: 1;">
+                <t t-out="highlightedHtml"/>
+            </pre>
+            <!-- Actual textarea -->
+            <textarea class="setdb-editor-textarea form-control position-absolute top-0 start-0 w-100 h-100 m-0 p-3 border-0"
+                      t-ref="textarea"
+                      t-att-value="props.value"
+                      t-on-input="onInput"
+                      t-on-keydown="onKeydown"
+                      t-on-scroll="onScroll"
+                      spellcheck="false"
+                      autocomplete="off"
+                      autocorrect="off"
+                      autocapitalize="off"
+                      placeholder="Enter your SetQL query here...&#10;&#10;Examples:&#10;  UNION(plan_kont, plan_dept)&#10;  MEMBERS(plan_kont)&#10;  FIND(&quot;revenue*&quot;)&#10;  INTERSECT(budget_2025, plan_kont)&#10;&#10;Press Ctrl+Space for keyword autocomplete."
+                      style="font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; line-height: 20px; resize: none; background: transparent; color: #333; caret-color: #333; z-index: 2; white-space: pre-wrap; word-wrap: break-word;"/>
+
+            <!-- Autocomplete dropdown -->
+            <div t-if="state.showAutocomplete"
+                 class="setdb-autocomplete dropdown-menu show position-absolute shadow"
+                 t-attf-style="top: {{ state.autocompleteTop + 40 }}px; left: {{ state.autocompleteLeft + 12 }}px; z-index: 10; max-height: 200px; overflow-y: auto;">
+                <t t-foreach="state.autocompleteItems" t-as="item" t-key="item">
+                    <button class="dropdown-item small py-1"
+                            t-att-class="{ 'active': state.autocompleteIndex === item_index }"
+                            t-on-click="() => this.selectAutocompleteItem(item_index)">
+                        <i class="fa fa-code me-2 text-muted"/>
+                        <t t-esc="item"/>
+                    </button>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <!-- ================================================================
+         QueryResults — Sortable data table
+         ================================================================ -->
+    <t t-name="setdb_ui.QueryResults">
+        <div class="setdb-query-results">
+            <!-- Status bar -->
+            <div class="d-flex align-items-center justify-content-between px-3 py-1 bg-light border-bottom small">
+                <div>
+                    <span class="fw-semibold" t-esc="props.result_count"/> result(s)
+                    <span t-if="props.execution_time_ms" class="text-muted ms-2">
+                        in <t t-esc="executionTimeFormatted"/>
+                    </span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted">
+                        Page <t t-esc="state.page + 1"/> / <t t-esc="totalPages"/>
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-1"
+                            t-on-click="prevPage" t-att-disabled="state.page === 0">
+                        <i class="fa fa-chevron-left"/>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-1"
+                            t-on-click="nextPage" t-att-disabled="state.page >= totalPages - 1">
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="setdb-query-results-table table table-hover table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-muted" style="width: 40px;">#</th>
+                            <t t-foreach="columns" t-as="col" t-key="col">
+                                <th role="button" t-on-click="() => this.sortBy(col)">
+                                    <span t-esc="col"/>
+                                    <i class="fa ms-1 small" t-att-class="sortIcon(col)"/>
+                                </th>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="pagedResults" t-as="row" t-key="row_index">
+                            <tr role="button" t-on-click="() => this.onRowClick(row)" class="setdb-result-row">
+                                <td class="text-muted small">
+                                    <t t-esc="state.page * state.pageSize + row_index + 1"/>
+                                </td>
+                                <t t-foreach="columns" t-as="col" t-key="col">
+                                    <td>
+                                        <t t-esc="getCellValue(row, col)"/>
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+
+    <!-- ================================================================
+         ExplainViewer — Execution plan tree
+         ================================================================ -->
+    <t t-name="setdb_ui.ExplainViewer">
+        <div class="setdb-explain-tree p-3">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fa fa-sitemap me-2 text-primary"/>
+                <span class="fw-semibold">Execution Plan</span>
+            </div>
+            <div t-if="!props.plan_text" class="text-muted p-3">
+                No execution plan available.
+            </div>
+            <div t-else="" class="setdb-explain-nodes">
+                <t t-foreach="planNodes" t-as="node" t-key="node_index">
+                    <div t-att-class="getNodeClass(node)" t-att-style="getNodeStyle(node)">
+                        <i class="fa me-2" t-att-class="getNodeIcon(node)"/>
+                        <span t-esc="node.text"/>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <!-- ================================================================
+         QueryHistory — History list for sidebar
+         ================================================================ -->
+    <t t-name="setdb_ui.QueryHistory">
+        <div class="setdb-query-history p-1">
+            <div t-if="props.history.length === 0" class="text-muted text-center p-3 small">
+                No query history yet.
+            </div>
+            <t t-foreach="props.history" t-as="item" t-key="item.id">
+                <div class="setdb-history-item border rounded p-2 mb-1 mx-1"
+                     role="button"
+                     t-on-click="() => this.onItemClick(item)">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span t-att-class="statusBadgeClass(item.status)" style="font-size: 0.7em;">
+                            <t t-esc="item.status"/>
+                        </span>
+                        <span class="text-muted" style="font-size: 0.7em;" t-esc="formatTime(item.executed_at)"/>
+                    </div>
+                    <div class="small text-truncate fw-medium" style="font-family: monospace; font-size: 0.78em;" t-esc="truncateQuery(item.query_text)"/>
+                    <div class="d-flex gap-2 mt-1" style="font-size: 0.7em;">
+                        <span t-if="item.execution_time_ms" class="text-muted">
+                            <i class="fa fa-clock-o me-1"/><t t-esc="formatDuration(item.execution_time_ms)"/>
+                        </span>
+                        <span t-if="item.result_count" class="text-muted">
+                            <i class="fa fa-table me-1"/><t t-esc="item.result_count"/> rows
+                        </span>
+                        <span t-if="item.error_message" class="text-danger text-truncate" style="max-width: 120px;" t-esc="item.error_message"/>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <!-- ================================================================
+         QueryBuilder — Visual query composition
+         ================================================================ -->
+    <t t-name="setdb_ui.QueryBuilder">
+        <div class="setdb-query-builder p-3">
+            <div class="row g-3">
+                <!-- Operation selector -->
+                <div class="col-12">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fa fa-wrench me-2 text-primary"/>
+                        <span class="fw-semibold">Visual Query Builder</span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Select an operation, provide operands, and generate SetQL without writing code.
+                    </p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">Operation</label>
+                    <select class="form-select" t-on-change="onOperationChange">
+                        <t t-foreach="operations" t-as="op" t-key="op.value">
+                            <option t-att-value="op.value" t-att-selected="op.value === state.operation" t-esc="op.label"/>
+                        </t>
+                    </select>
+                    <div class="text-muted mt-1" style="font-size: 0.78em;" t-esc="selectedOp.description"/>
+                </div>
+
+                <div class="col-md-8">
+                    <!-- FIND pattern input -->
+                    <t t-if="selectedOp.hasPattern">
+                        <label class="form-label fw-semibold small">Search Pattern</label>
+                        <div class="d-flex gap-2">
+                            <select class="form-select" style="max-width: 140px;" t-on-change="onFieldChange">
+                                <option value="name" t-att-selected="state.findField === 'name'">Name</option>
+                                <option value="guid" t-att-selected="state.findField === 'guid'">GUID</option>
+                                <option value="element_type" t-att-selected="state.findField === 'element_type'">Type</option>
+                            </select>
+                            <input type="text" class="form-control"
+                                   t-att-value="state.findPattern"
+                                   t-on-input="onPatternChange"
+                                   placeholder='e.g. revenue* or "exact name"'/>
+                        </div>
+                    </t>
+
+                    <!-- Operand inputs -->
+                    <t t-if="!selectedOp.hasPattern">
+                        <label class="form-label fw-semibold small">
+                            Operands
+                            <span class="text-muted fw-normal ms-1">(element or set names)</span>
+                        </label>
+                        <t t-foreach="state.operands" t-as="operand" t-key="operand_index">
+                            <div class="input-group mb-2">
+                                <span class="input-group-text small bg-light" style="min-width: 36px; justify-content: center;">
+                                    <t t-esc="operand_index + 1"/>
+                                </span>
+                                <input type="text" class="form-control"
+                                       t-att-value="operand"
+                                       t-on-input="(ev) => this.onOperandChange(operand_index, ev)"
+                                       t-attf-placeholder="Element or set name #{{ operand_index + 1 }}"/>
+                                <button t-if="canRemoveOperand"
+                                        class="btn btn-outline-danger btn-sm"
+                                        t-on-click="() => this.removeOperand(operand_index)">
+                                    <i class="fa fa-minus"/>
+                                </button>
+                            </div>
+                        </t>
+                        <button t-if="canAddOperand"
+                                class="btn btn-sm btn-outline-secondary mb-2"
+                                t-on-click="addOperand">
+                            <i class="fa fa-plus me-1"/>Add Operand
+                        </button>
+                    </t>
+                </div>
+
+                <!-- Preview and generate -->
+                <div class="col-12">
+                    <div class="bg-light rounded p-2 mb-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="small text-muted me-2">Preview:</span>
+                            <code class="small" t-esc="previewQuery"/>
+                        </div>
+                        <button class="btn btn-sm btn-primary"
+                                t-on-click="generateQuery"
+                                t-att-disabled="!isValid">
+                            <i class="fa fa-arrow-right me-1"/>Use in Editor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

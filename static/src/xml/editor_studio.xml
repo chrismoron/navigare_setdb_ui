@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- ============================================================ -->
+    <!-- EditorStudio — Main client action                            -->
+    <!-- ============================================================ -->
+    <t t-name="setdb_ui.EditorStudio">
+        <div class="setdb-studio-container h-100">
+            <!-- Toolbar -->
+            <div class="setdb-toolbar">
+                <i class="fa fa-pencil-square-o me-1 text-primary"/>
+                <strong>Editor Studio</strong>
+                <div class="ms-3 btn-group btn-group-sm" role="group">
+                    <button class="btn btn-outline-secondary"
+                            t-att-class="{'active': state.active_panel === 'tree'}"
+                            t-on-click="() => this.setActivePanel('tree')">
+                        <i class="fa fa-sitemap me-1"/>DAG
+                    </button>
+                    <button class="btn btn-outline-secondary"
+                            t-att-class="{'active': state.active_panel === 'import'}"
+                            t-on-click="() => this.setActivePanel('import')">
+                        <i class="fa fa-upload me-1"/>Import
+                    </button>
+                    <button class="btn btn-outline-secondary"
+                            t-att-class="{'active': state.active_panel === 'bridges'}"
+                            t-on-click="() => this.setActivePanel('bridges')">
+                        <i class="fa fa-exchange me-1"/>Bridges
+                    </button>
+                </div>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <span t-if="state.is_loading" class="spinner-border spinner-border-sm text-primary"/>
+                    <span class="text-muted small">
+                        <t t-esc="state.elements.length"/> elements,
+                        <t t-esc="state.edges.length"/> edges
+                    </span>
+                    <button class="btn btn-sm btn-outline-primary" t-on-click="loadElements">
+                        <i class="fa fa-refresh"/>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <div class="flex-grow-1 d-flex overflow-hidden">
+
+                <!-- Tree / Import / Bridges panel -->
+                <t t-if="state.active_panel === 'tree'">
+                    <div class="setdb-editor-studio w-100">
+                        <!-- Left sidebar: element tree + create form -->
+                        <div class="setdb-editor-tree d-flex flex-column">
+                            <!-- Search -->
+                            <div class="p-2 border-bottom">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fa fa-search"/></span>
+                                    <input type="text" class="form-control" placeholder="Search elements..."
+                                           t-att-value="state.search_query"
+                                           t-on-input="onSearchInput"/>
+                                </div>
+                            </div>
+
+                            <!-- Create form -->
+                            <div class="p-2 border-bottom bg-light">
+                                <div class="mb-1">
+                                    <input type="text" class="form-control form-control-sm"
+                                           placeholder="New element name..."
+                                           t-att-value="state.element_form.name"
+                                           t-on-input="onFormNameInput"/>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="onFormTypeChange">
+                                        <option value="primitive">Primitive</option>
+                                        <option value="set">Set</option>
+                                        <option value="sequence">Sequence</option>
+                                    </select>
+                                    <button class="btn btn-sm btn-primary text-nowrap"
+                                            t-on-click="() => this.createElement()">
+                                        <i class="fa fa-plus me-1"/>Add
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tree list -->
+                            <div class="flex-grow-1 overflow-auto p-1">
+                                <t t-foreach="rootElements" t-as="el" t-key="el.id">
+                                    <t t-call="setdb_ui.EditorStudio.TreeNode">
+                                        <t t-set="element" t-value="el"/>
+                                        <t t-set="depth" t-value="0"/>
+                                    </t>
+                                </t>
+                                <div t-if="rootElements.length === 0 and !state.is_loading"
+                                     class="text-muted text-center p-3 small">
+                                    No elements found. Create one above.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: DAG Canvas -->
+                        <div class="d-flex flex-column">
+                            <SetDBDagCanvas
+                                elements="state.elements"
+                                edges="state.edges"
+                                onSelectElement.bind="onSelectElement"
+                                onCreateEdge.bind="onCreateEdge"/>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-if="state.active_panel === 'import'">
+                    <div class="w-100 p-3 overflow-auto">
+                        <SetDBBulkImport onImportComplete.bind="onImportComplete"/>
+                    </div>
+                </t>
+
+                <t t-if="state.active_panel === 'bridges'">
+                    <div class="w-100 p-3 overflow-auto">
+                        <SetDBBridgeConfig onSave.bind="onBridgeSave"/>
+                    </div>
+                </t>
+
+                <!-- Detail panel (right side, visible when element selected) -->
+                <t t-if="state.selected_element and state.active_panel === 'tree'">
+                    <div class="setdb-panel" style="width: 320px; min-width: 320px;">
+                        <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                            <strong><i class="fa fa-info-circle me-1"/>Element Details</strong>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    t-on-click="() => this.state.selected_element = null">
+                                <i class="fa fa-times"/>
+                            </button>
+                        </div>
+                        <div class="p-3">
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold">Name</label>
+                                <input type="text" class="form-control form-control-sm"
+                                       t-att-value="state.selected_element.name"
+                                       t-on-input="onSelectedNameInput"/>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold">Type</label>
+                                <select class="form-select form-select-sm"
+                                        t-on-change="onSelectedTypeChange">
+                                    <option value="primitive"
+                                            t-att-selected="state.selected_element.element_type === 'primitive'">
+                                        Primitive
+                                    </option>
+                                    <option value="set"
+                                            t-att-selected="state.selected_element.element_type === 'set'">
+                                        Set
+                                    </option>
+                                    <option value="sequence"
+                                            t-att-selected="state.selected_element.element_type === 'sequence'">
+                                        Sequence
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold">Metadata (JSON)</label>
+                                <textarea class="form-control form-control-sm" rows="4"
+                                          t-att-value="state.selected_element.metadata_json"
+                                          t-on-input="onSelectedMetadataInput"/>
+                            </div>
+                            <div class="mb-2">
+                                <span class="text-muted small">
+                                    ID: <t t-esc="state.selected_element.id"/>
+                                </span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-primary flex-grow-1"
+                                        t-on-click="updateElement">
+                                    <i class="fa fa-save me-1"/>Save
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger"
+                                        t-on-click="() => this.deleteElement(this.state.selected_element.id)">
+                                    <i class="fa fa-trash"/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <!-- Recursive tree node sub-template -->
+    <t t-name="setdb_ui.EditorStudio.TreeNode">
+        <div class="d-flex align-items-center py-1 px-1 rounded cursor-pointer tree-node"
+             t-att-style="'padding-left: ' + (depth * 16 + 4) + 'px'"
+             t-att-class="{'bg-primary bg-opacity-10': state.selected_element and state.selected_element.id === element.id}"
+             t-on-click.stop="() => this.onSelectElement(element)">
+            <i class="fa me-1 small"
+               t-att-class="getElementTypeIcon(element.element_type)"/>
+            <span class="flex-grow-1 small text-truncate" t-esc="element.name"/>
+            <span class="ms-1" t-att-class="getElementTypeBadge(element.element_type)">
+                <t t-esc="element.element_type.charAt(0).toUpperCase()"/>
+            </span>
+        </div>
+        <t t-foreach="getChildren(element.id)" t-as="child" t-key="child.id">
+            <t t-call="setdb_ui.EditorStudio.TreeNode">
+                <t t-set="element" t-value="child"/>
+                <t t-set="depth" t-value="depth + 1"/>
+            </t>
+        </t>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- DagCanvas — SVG DAG visualization                            -->
+    <!-- ============================================================ -->
+    <t t-name="setdb_ui.DagCanvas">
+        <div class="setdb-dag-canvas flex-grow-1 position-relative" t-ref="canvas">
+            <!-- Connection mode indicator -->
+            <div t-if="isConnecting"
+                 class="position-absolute top-0 start-0 m-2 p-2 bg-warning bg-opacity-75 rounded small">
+                <i class="fa fa-link me-1"/>
+                Connecting from <strong t-esc="connectingLabel"/>
+                — click a target node (or click canvas to cancel)
+            </div>
+
+            <svg t-att-viewBox="state.viewBox"
+                 class="w-100 h-100"
+                 style="min-height: 400px"
+                 t-on-click="onCanvasClick">
+                <!-- Arrow marker -->
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                            refX="10" refY="3.5" orient="auto" fill="#999">
+                        <polygon points="0 0, 10 3.5, 0 7"/>
+                    </marker>
+                </defs>
+
+                <!-- Edges -->
+                <t t-foreach="state.edgePaths" t-as="edge" t-key="edge.id">
+                    <path class="setdb-dag-edge"
+                          t-att-d="edge.d"/>
+                </t>
+
+                <!-- Nodes -->
+                <t t-foreach="state.nodes" t-as="node" t-key="node.id">
+                    <g t-att-class="'setdb-dag-node ' + node.element_type"
+                       t-on-click.stop="(ev) => this.onNodeClick(ev, node)"
+                       t-on-dblclick.stop="(ev) => this.onNodeDblClick(ev, node)">
+                        <rect t-att-x="node.x" t-att-y="node.y"
+                              t-att-width="node.width" t-att-height="node.height"
+                              t-att-fill="node.fill" t-att-stroke="node.stroke"/>
+                        <text t-att-x="node.textX" t-att-y="node.textY"
+                              t-esc="node.label"/>
+                    </g>
+                </t>
+            </svg>
+        </div>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- BulkImport — CSV import wizard                               -->
+    <!-- ============================================================ -->
+    <t t-name="setdb_ui.BulkImport">
+        <div class="setdb-panel p-4" style="max-width: 900px; margin: 0 auto;">
+            <h5 class="mb-3"><i class="fa fa-upload me-2"/>Bulk Import Elements</h5>
+
+            <!-- Step 1: File upload -->
+            <div t-if="!state.file_data" class="text-center p-5 border border-dashed rounded bg-light">
+                <i class="fa fa-file-text-o fa-3x text-muted mb-3 d-block"/>
+                <p class="text-muted mb-3">Upload a CSV file with element data</p>
+                <label class="btn btn-primary">
+                    <i class="fa fa-folder-open me-1"/>Choose CSV File
+                    <input type="file" accept=".csv,.tsv,.txt" class="d-none"
+                           t-on-change="onFileChange"/>
+                </label>
+                <p class="text-muted small mt-3">
+                    Expected columns: name, type (primitive/set/sequence), parent, and any metadata columns.
+                </p>
+            </div>
+
+            <!-- Step 2: Column mapping + preview -->
+            <t t-if="state.file_data and !state.import_stats">
+                <div class="mb-3 d-flex align-items-center justify-content-between">
+                    <span>
+                        <i class="fa fa-file-text me-1"/>
+                        <strong t-esc="state.file_name"/> — <t t-esc="totalRows"/> rows
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary" t-on-click="resetImport">
+                        <i class="fa fa-times me-1"/>Reset
+                    </button>
+                </div>
+
+                <!-- Mapping table -->
+                <h6 class="mb-2">Column Mapping</h6>
+                <table class="table table-sm table-bordered mb-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th>CSV Column</th>
+                            <th>Maps To</th>
+                            <th>Metadata Key</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="state.columns" t-as="col" t-key="col_index">
+                            <tr>
+                                <td class="align-middle">
+                                    <code t-esc="col"/>
+                                </td>
+                                <td>
+                                    <select class="form-select form-select-sm"
+                                            t-on-change="(ev) => this.onMappingChange(ev, col_index)">
+                                        <t t-foreach="mappingOptions" t-as="opt" t-key="opt.value">
+                                            <option t-att-value="opt.value"
+                                                    t-att-selected="state.mapping[col_index] === opt.value">
+                                                <t t-esc="opt.label"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                           placeholder="key name..."
+                                           t-att-disabled="state.mapping[col_index] !== 'metadata'"
+                                           t-att-value="state.metadata_keys[col_index]"
+                                           t-on-input="(ev) => this.onMetadataKeyInput(ev, col_index)"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- Preview -->
+                <h6 class="mb-2">Preview (first 5 rows)</h6>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-striped table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <t t-foreach="state.columns" t-as="col" t-key="col_index">
+                                    <th class="small" t-esc="col"/>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="state.preview_rows" t-as="row" t-key="row_index">
+                                <tr>
+                                    <t t-foreach="row" t-as="cell" t-key="cell_index">
+                                        <td class="small" t-esc="cell"/>
+                                    </t>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Import progress -->
+                <div t-if="state.is_importing" class="mb-3">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar"
+                             t-att-style="'width: ' + state.import_progress + '%'"
+                             t-att-aria-valuenow="state.import_progress">
+                            <t t-esc="state.import_progress"/>%
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Import button -->
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary"
+                            t-att-disabled="!hasNameMapping or state.is_importing"
+                            t-on-click="doImport">
+                        <i class="fa fa-download me-1"/>
+                        Import <t t-esc="totalRows"/> Rows
+                    </button>
+                    <span t-if="!hasNameMapping" class="text-danger small align-self-center">
+                        <i class="fa fa-exclamation-triangle me-1"/>
+                        Map at least one column to "Element Name"
+                    </span>
+                </div>
+            </t>
+
+            <!-- Step 3: Results -->
+            <t t-if="state.import_stats">
+                <div class="alert alert-success">
+                    <h6><i class="fa fa-check-circle me-1"/>Import Complete</h6>
+                    <ul class="mb-0">
+                        <li><strong t-esc="state.import_stats.created"/> elements created</li>
+                        <li><strong t-esc="state.import_stats.edges"/> edges created</li>
+                        <li><strong t-esc="state.import_stats.skipped"/> rows skipped</li>
+                        <li t-if="state.import_stats.errors > 0" class="text-danger">
+                            <strong t-esc="state.import_stats.errors"/> errors
+                        </li>
+                    </ul>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" t-on-click="finishImport">
+                        <i class="fa fa-arrow-left me-1"/>Back to DAG
+                    </button>
+                    <button class="btn btn-outline-secondary" t-on-click="resetImport">
+                        <i class="fa fa-upload me-1"/>Import Another File
+                    </button>
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <!-- ============================================================ -->
+    <!-- BridgeConfig — Data bridge configurator                      -->
+    <!-- ============================================================ -->
+    <t t-name="setdb_ui.BridgeConfig">
+        <div class="d-flex gap-3" style="max-width: 1100px; margin: 0 auto;">
+            <!-- Bridge list -->
+            <div class="setdb-panel flex-grow-1" style="min-width: 400px;">
+                <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0"><i class="fa fa-exchange me-2"/>Data Bridges</h6>
+                    <button class="btn btn-sm btn-outline-primary" t-on-click="loadBridges">
+                        <i class="fa fa-refresh"/>
+                    </button>
+                </div>
+
+                <div t-if="state.is_loading" class="text-center p-4">
+                    <span class="spinner-border spinner-border-sm"/>
+                </div>
+
+                <div t-if="!state.is_loading and state.bridges.length === 0"
+                     class="text-muted text-center p-4">
+                    No bridges configured. Create one in Settings.
+                </div>
+
+                <div class="list-group list-group-flush">
+                    <t t-foreach="state.bridges" t-as="bridge" t-key="bridge.id">
+                        <div class="list-group-item list-group-item-action d-flex align-items-center"
+                             t-att-class="{'active': state.selected_bridge and state.selected_bridge.id === bridge.id}"
+                             t-on-click="() => this.selectBridge(bridge)">
+                            <div class="flex-grow-1">
+                                <div class="fw-bold" t-esc="bridge.name"/>
+                                <div class="small text-muted">
+                                    <t t-esc="bridge.source_model_id[1]"/> —
+                                    <t t-esc="getSyncModeLabel(bridge.sync_mode)"/>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span t-att-class="getSyncStatusClass(bridge)">
+                                    <t t-esc="formatDate(bridge.last_sync)"/>
+                                </span>
+                                <button class="btn btn-sm btn-outline-success"
+                                        t-att-disabled="state.is_syncing"
+                                        t-on-click.stop="() => this.syncBridge(bridge.id)"
+                                        title="Sync now">
+                                    <i class="fa fa-play"/>
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- Bridge detail / edit panel -->
+            <t t-if="state.selected_bridge">
+                <div class="setdb-panel" style="width: 400px; min-width: 400px;">
+                    <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0"><i class="fa fa-cog me-2"/>Configure Bridge</h6>
+                        <button class="btn btn-sm btn-outline-secondary" t-on-click="deselectBridge">
+                            <i class="fa fa-times"/>
+                        </button>
+                    </div>
+                    <div class="p-3">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Name</label>
+                            <input type="text" class="form-control form-control-sm"
+                                   t-att-value="state.selected_bridge.name"
+                                   t-on-input="onNameInput"/>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Source Model</label>
+                            <input type="text" class="form-control form-control-sm"
+                                   t-att-value="state.selected_bridge.source_model_id[1]"
+                                   disabled="1"/>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Sync Mode</label>
+                            <select class="form-select form-select-sm"
+                                    t-on-change="onSyncModeChange">
+                                <option value="manual"
+                                        t-att-selected="state.selected_bridge.sync_mode === 'manual'">
+                                    Manual
+                                </option>
+                                <option value="on_change"
+                                        t-att-selected="state.selected_bridge.sync_mode === 'on_change'">
+                                    On Change
+                                </option>
+                                <option value="scheduled"
+                                        t-att-selected="state.selected_bridge.sync_mode === 'scheduled'">
+                                    Scheduled
+                                </option>
+                            </select>
+                        </div>
+                        <div t-if="state.selected_bridge.sync_mode === 'scheduled'"
+                             class="mb-2 d-flex gap-2">
+                            <div class="flex-grow-1">
+                                <label class="form-label small fw-bold">Interval</label>
+                                <input type="number" class="form-control form-control-sm"
+                                       t-att-value="state.selected_bridge.interval_number"
+                                       t-on-input="onIntervalNumberInput"
+                                       min="1"/>
+                            </div>
+                            <div class="flex-grow-1">
+                                <label class="form-label small fw-bold">Unit</label>
+                                <select class="form-select form-select-sm"
+                                        t-on-change="onIntervalTypeChange">
+                                    <option value="hours"
+                                            t-att-selected="state.selected_bridge.interval_type === 'hours'">
+                                        Hours
+                                    </option>
+                                    <option value="days"
+                                            t-att-selected="state.selected_bridge.interval_type === 'days'">
+                                        Days
+                                    </option>
+                                    <option value="weeks"
+                                            t-att-selected="state.selected_bridge.interval_type === 'weeks'">
+                                        Weeks
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Domain Filter</label>
+                            <textarea class="form-control form-control-sm" rows="2"
+                                      t-att-value="state.selected_bridge.domain_filter"
+                                      t-on-input="onDomainFilterInput"/>
+                        </div>
+                        <div class="mb-2 small text-muted">
+                            Last sync: <t t-esc="formatDate(state.selected_bridge.last_sync)"/>
+                            <t t-if="state.selected_bridge.last_sync_count">
+                                — <t t-esc="state.selected_bridge.last_sync_count"/> records
+                            </t>
+                        </div>
+                        <button class="btn btn-primary btn-sm w-100" t-on-click="saveBridge">
+                            <i class="fa fa-save me-1"/>Save Changes
+                        </button>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

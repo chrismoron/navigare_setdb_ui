@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- ============================================================ -->
+    <!-- Dashboard — SetDB overview                                   -->
+    <!-- ============================================================ -->
+    <t t-name="setdb_ui.Dashboard">
+        <div class="setdb-studio-container h-100 overflow-auto">
+            <!-- Header -->
+            <div class="setdb-toolbar">
+                <i class="fa fa-tachometer me-1 text-primary"/>
+                <strong>SetDB Dashboard</strong>
+                <div class="ms-auto">
+                    <button class="btn btn-sm btn-outline-primary" t-on-click="loadDashboard"
+                            t-att-disabled="state.is_loading">
+                        <i class="fa fa-refresh me-1"/>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3">
+                <!-- Loading indicator -->
+                <div t-if="state.is_loading" class="text-center p-5">
+                    <span class="spinner-border text-primary"/>
+                    <p class="text-muted mt-2">Loading dashboard...</p>
+                </div>
+
+                <t t-if="!state.is_loading">
+                    <!-- Stat cards -->
+                    <div class="row g-3 mb-4">
+                        <t t-foreach="statCards" t-as="card" t-key="card.label">
+                            <div class="col-lg-2 col-md-4 col-sm-6">
+                                <div class="setdb-panel p-3 text-center h-100">
+                                    <div class="mb-2">
+                                        <i t-att-class="'fa ' + card.icon + ' fa-2x text-' + card.color"/>
+                                    </div>
+                                    <div class="fs-3 fw-bold" t-esc="card.value"/>
+                                    <div class="text-muted small" t-esc="card.label"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Type breakdown -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="setdb-panel p-3 h-100">
+                                <h6 class="mb-3">
+                                    <i class="fa fa-pie-chart me-1 text-primary"/>
+                                    Element Types
+                                </h6>
+                                <t t-foreach="typeBreakdown" t-as="item" t-key="item.label">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small" t-esc="item.label"/>
+                                        <span t-att-class="'setdb-badge ' + item.cls">
+                                            <t t-esc="item.value"/>
+                                        </span>
+                                    </div>
+                                </t>
+                                <hr/>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small fw-bold">Total</span>
+                                    <span class="fw-bold" t-esc="state.stats.element_count"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick actions -->
+                        <div class="col-md-4">
+                            <div class="setdb-panel p-3 h-100">
+                                <h6 class="mb-3">
+                                    <i class="fa fa-bolt me-1 text-warning"/>
+                                    Quick Actions
+                                </h6>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary btn-sm text-start"
+                                            t-on-click="openEditorStudio">
+                                        <i class="fa fa-pencil-square-o me-2"/>Editor Studio
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm text-start"
+                                            t-on-click="openQueryStudio">
+                                        <i class="fa fa-code me-2"/>Query Studio
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm text-start"
+                                            t-on-click="openCubeExplorer">
+                                        <i class="fa fa-th me-2"/>OLAP Cubes
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm text-start"
+                                            t-on-click="openElements">
+                                        <i class="fa fa-cubes me-2"/>Browse Elements
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm text-start"
+                                            t-on-click="openBridges">
+                                        <i class="fa fa-exchange me-2"/>Data Bridges
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm text-start"
+                                            t-on-click="openSavedQueries">
+                                        <i class="fa fa-bookmark me-2"/>Saved Queries
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shortcuts -->
+                        <div class="col-md-4">
+                            <div class="setdb-panel p-3 h-100">
+                                <h6 class="mb-3">
+                                    <i class="fa fa-star me-1 text-warning"/>
+                                    Shortcuts
+                                </h6>
+                                <t t-if="state.shortcuts.length === 0">
+                                    <p class="text-muted small">
+                                        No shortcuts configured. Add shortcuts in your profile settings.
+                                    </p>
+                                </t>
+                                <div class="list-group list-group-flush">
+                                    <t t-foreach="state.shortcuts" t-as="sc" t-key="sc.id">
+                                        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center py-2"
+                                           t-on-click.prevent="() => this.executeShortcut(sc)">
+                                            <i t-att-class="'fa ' + getShortcutIcon(sc) + ' me-2 text-muted'"/>
+                                            <span class="flex-grow-1 small" t-esc="sc.name"/>
+                                            <kbd t-if="sc.keyboard_shortcut" class="small"
+                                                 t-esc="sc.keyboard_shortcut"/>
+                                        </a>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent queries -->
+                    <div class="setdb-panel p-3">
+                        <h6 class="mb-3">
+                            <i class="fa fa-history me-1 text-info"/>
+                            Recent Queries
+                        </h6>
+                        <t t-if="state.recent_queries.length === 0">
+                            <p class="text-muted small">No queries executed yet.</p>
+                        </t>
+                        <t t-if="state.recent_queries.length > 0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Query</th>
+                                            <th style="width: 160px;">Executed</th>
+                                            <th style="width: 100px;">Time</th>
+                                            <th style="width: 80px;">Results</th>
+                                            <th style="width: 80px;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.recent_queries" t-as="q" t-key="q.id">
+                                            <tr>
+                                                <td>
+                                                    <code class="small" t-esc="truncateQuery(q.query_text)"/>
+                                                </td>
+                                                <td class="small text-muted" t-esc="formatDate(q.executed_at)"/>
+                                                <td class="small" t-esc="formatMs(q.execution_time_ms)"/>
+                                                <td class="small" t-esc="q.result_count"/>
+                                                <td>
+                                                    <span t-att-class="getStatusBadge(q.status)"
+                                                          t-esc="q.status"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

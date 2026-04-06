@@ -52,11 +52,42 @@ smart materialization suggestions, and auto-tuning.
     ],
     'assets': {
         'web.assets_backend': [
+            # CSS
             'setdb_ui/static/src/css/common.css',
             'setdb_ui/static/src/css/query_studio.css',
             'setdb_ui/static/src/css/cube_explorer.css',
             'setdb_ui/static/src/css/editor_studio.css',
             'setdb_ui/static/src/css/ai_assistant.css',
+            # Query Studio JS
+            'setdb_ui/static/src/js/query_studio/query_studio.js',
+            'setdb_ui/static/src/js/query_studio/query_editor.js',
+            'setdb_ui/static/src/js/query_studio/query_results.js',
+            'setdb_ui/static/src/js/query_studio/explain_viewer.js',
+            'setdb_ui/static/src/js/query_studio/query_history.js',
+            'setdb_ui/static/src/js/query_studio/query_builder.js',
+            # Cube Explorer JS
+            'setdb_ui/static/src/js/cube_explorer/cube_explorer.js',
+            'setdb_ui/static/src/js/cube_explorer/cube_grid.js',
+            'setdb_ui/static/src/js/cube_explorer/dimension_picker.js',
+            'setdb_ui/static/src/js/cube_explorer/cube_cell.js',
+            'setdb_ui/static/src/js/cube_explorer/cube_toolbar.js',
+            'setdb_ui/static/src/js/cube_explorer/measure_picker.js',
+            # Editor Studio JS
+            'setdb_ui/static/src/js/editor_studio/editor_studio.js',
+            'setdb_ui/static/src/js/editor_studio/dag_canvas.js',
+            'setdb_ui/static/src/js/editor_studio/bulk_import.js',
+            'setdb_ui/static/src/js/editor_studio/bridge_config.js',
+            # AI Assistant JS
+            'setdb_ui/static/src/js/ai_assistant/assistant.js',
+            'setdb_ui/static/src/js/ai_assistant/suggestion.js',
+            # Dashboard JS
+            'setdb_ui/static/src/js/dashboard/dashboard.js',
+            # OWL Templates
+            'setdb_ui/static/src/xml/query_studio.xml',
+            'setdb_ui/static/src/xml/cube_explorer.xml',
+            'setdb_ui/static/src/xml/editor_studio.xml',
+            'setdb_ui/static/src/xml/ai_assistant.xml',
+            'setdb_ui/static/src/xml/dashboard.xml',
         ],
     },
     'installable': True,

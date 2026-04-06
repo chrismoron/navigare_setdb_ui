@@ -60,3 +60,122 @@
     content: '├── ';
     color: #aaa;
 }
+
+/* ===== Editor Component ===== */
+.setdb-editor-container {
+    background: #fafbfc;
+    border-bottom: 1px solid var(--o-border-color, #dee2e6);
+}
+
+.setdb-editor-textarea {
+    outline: none !important;
+    box-shadow: none !important;
+    tab-size: 4;
+}
+
+.setdb-editor-textarea:focus {
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+.setdb-editor-highlight {
+    tab-size: 4;
+}
+
+/* Syntax highlight token colors */
+.setdb-hl-keyword {
+    color: #0550ae;
+    font-weight: 600;
+}
+.setdb-hl-string {
+    color: #0a3069;
+}
+.setdb-hl-comment {
+    color: #6e7781;
+    font-style: italic;
+}
+.setdb-hl-number {
+    color: #0550ae;
+}
+.setdb-hl-ref {
+    color: #8250df;
+    font-weight: 500;
+}
+
+/* Autocomplete dropdown */
+.setdb-autocomplete {
+    min-width: 180px;
+    font-size: 0.85em;
+}
+.setdb-autocomplete .dropdown-item.active {
+    background-color: var(--o-primary, #714b67);
+    color: #fff;
+}
+
+/* ===== History Items ===== */
+.setdb-history-item {
+    transition: background-color 0.15s;
+    cursor: pointer;
+}
+.setdb-history-item:hover {
+    background-color: var(--o-bg-color-200, #f8f9fa);
+}
+
+/* ===== Saved Query Items ===== */
+.setdb-saved-query-item {
+    transition: background-color 0.15s;
+    cursor: pointer;
+}
+.setdb-saved-query-item:hover {
+    background-color: var(--o-bg-color-200, #f8f9fa);
+}
+
+/* ===== Result Row Hover ===== */
+.setdb-result-row {
+    cursor: pointer;
+}
+.setdb-result-row:hover td {
+    background-color: var(--o-bg-color-200, #f0f4ff) !important;
+}
+
+/* ===== Explain Node Types ===== */
+.setdb-explain-nodes {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85em;
+    line-height: 1.8;
+}
+.setdb-explain-node {
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin: 1px 0;
+}
+.setdb-explain-node:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+.setdb-explain-union .fa { color: #0d6efd; }
+.setdb-explain-intersect .fa { color: #198754; }
+.setdb-explain-difference .fa { color: #dc3545; }
+.setdb-explain-traverse .fa { color: #6f42c1; }
+.setdb-explain-ref .fa { color: #fd7e14; }
+.setdb-explain-filter .fa { color: #20c997; }
+.setdb-explain-optimized .fa { color: #ffc107; }
+.setdb-explain-default .fa { color: #adb5bd; }
+
+/* ===== Query Builder ===== */
+.setdb-query-builder .form-select,
+.setdb-query-builder .form-control {
+    font-size: 0.9em;
+}
+
+/* ===== Responsive: collapse sidebar on small screens ===== */
+@media (max-width: 768px) {
+    .setdb-query-studio {
+        grid-template-columns: 1fr;
+    }
+    .setdb-query-sidebar {
+        grid-row: auto;
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid var(--o-border-color, #dee2e6);
+    }
+}
