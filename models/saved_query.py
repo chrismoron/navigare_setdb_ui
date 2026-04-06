@@ -107,6 +107,26 @@ class SetDBSavedQuery(models.Model):
             'target': 'new',
         }
 
+    def action_open_query_wizard(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Query Builder',
+            'res_model': 'setdb.query.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
+    def action_open_parameter_wizard(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Parameter Builder',
+            'res_model': 'setdb.parameter.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_saved_query_id': self.id},
+        }
+
     def get_parameters_schema(self):
         """Return parsed parameter schema for the UI."""
         self.ensure_one()

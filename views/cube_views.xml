@@ -52,6 +52,11 @@
                     </group>
                     <notebook>
                         <page string="Measures">
+                            <div class="mb-2">
+                                <button name="action_open_measure_wizard" type="object"
+                                        string="Add Measure" class="btn-secondary btn-sm"
+                                        icon="fa-plus"/>
+                            </div>
                             <field name="measure_ids">
                                 <list editable="bottom">
                                     <field name="name"/>
@@ -63,6 +68,11 @@
                             </field>
                         </page>
                         <page string="Formulas">
+                            <div class="mb-2">
+                                <button name="action_open_formula_wizard" type="object"
+                                        string="Add Formula" class="btn-secondary btn-sm"
+                                        icon="fa-plus"/>
+                            </div>
                             <field name="formula_ids">
                                 <list editable="bottom">
                                     <field name="name"/>

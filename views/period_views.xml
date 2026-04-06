@@ -27,6 +27,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_open_period_wizard" type="object"
+                            string="Period Generation Wizard" icon="fa-magic"/>
                     <button name="action_generate" type="object"
                             string="Generate Periods"
                             class="oe_highlight" icon="fa-calendar"

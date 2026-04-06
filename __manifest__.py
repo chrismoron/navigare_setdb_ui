@@ -40,6 +40,7 @@ smart materialization suggestions, and auto-tuning.
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'views/wizard_views.xml',
         'views/saved_query_views.xml',
         'views/cube_views.xml',
         'views/period_views.xml',

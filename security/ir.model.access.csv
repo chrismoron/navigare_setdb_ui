@@ -31,3 +31,10 @@ access_ui_profile_user,setdb.ui.profile user,model_setdb_ui_profile,setdb.group_
 access_ui_template_user,setdb.ui.template user,model_setdb_ui_template,setdb.group_setdb_user,1,0,0,0
 access_ui_template_manager,setdb.ui.template manager,model_setdb_ui_template,setdb.group_setdb_manager,1,1,1,1
 access_ui_shortcut_user,setdb.ui.shortcut user,model_setdb_ui_shortcut,setdb.group_setdb_user,1,1,1,1
+access_query_wizard_user,setdb.query.wizard user,model_setdb_query_wizard,setdb.group_setdb_user,1,1,1,1
+access_formula_wizard_user,setdb.formula.wizard user,model_setdb_formula_wizard,setdb.group_setdb_user,1,1,1,1
+access_parameter_wizard_user,setdb.parameter.wizard user,model_setdb_parameter_wizard,setdb.group_setdb_user,1,1,1,1
+access_parameter_wizard_line_user,setdb.parameter.wizard.line user,model_setdb_parameter_wizard_line,setdb.group_setdb_user,1,1,1,1
+access_bridge_wizard_user,setdb.bridge.wizard user,model_setdb_bridge_wizard,setdb.group_setdb_user,1,1,1,1
+access_measure_wizard_user,setdb.measure.wizard user,model_setdb_measure_wizard,setdb.group_setdb_user,1,1,1,1
+access_period_wizard_user,setdb.period.wizard user,model_setdb_period_wizard,setdb.group_setdb_user,1,1,1,1

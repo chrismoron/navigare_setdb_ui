@@ -57,6 +57,28 @@ class SetDBCube(models.Model):
 
     _name_unique = models.Constraint('UNIQUE(name)', 'Cube name must be unique.')
 
+    def action_open_measure_wizard(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Measure Builder',
+            'res_model': 'setdb.measure.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_cube_id': self.id},
+        }
+
+    def action_open_formula_wizard(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Formula Builder',
+            'res_model': 'setdb.formula.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_cube_id': self.id},
+        }
+
     # ------------------------------------------------------------------
     # Expand-state helpers
     # ------------------------------------------------------------------

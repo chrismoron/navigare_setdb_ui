@@ -237,6 +237,53 @@ export class SetDBDashboard extends Component {
         return shortcut.icon || "fa-star";
     }
 
+    onStatCardClick(card) {
+        const actionMap = {
+            Elements: { res_model: "setdb.element", view_mode: "list,form" },
+            Edges: { res_model: "setdb.edge", view_mode: "list,form" },
+            Cubes: { res_model: "setdb.cube", view_mode: "list,kanban,form" },
+            "Saved Queries": { res_model: "setdb.saved.query", view_mode: "list,kanban,form,graph,pivot" },
+            Bridges: { res_model: "setdb.data.bridge", view_mode: "list,kanban,form" },
+            Hierarchies: { res_model: "setdb.hierarchy", view_mode: "list,form" },
+        };
+        const cfg = actionMap[card.label];
+        if (cfg) {
+            this.action.doAction({
+                type: "ir.actions.act_window",
+                name: card.label,
+                res_model: cfg.res_model,
+                view_mode: cfg.view_mode,
+                views: cfg.view_mode.split(",").map((v) => [false, v.trim()]),
+                target: "current",
+            });
+        }
+    }
+
+    onTypeClick(typeName) {
+        const typeMap = { Primitives: "primitive", Sets: "set", Sequences: "sequence" };
+        const elementType = typeMap[typeName];
+        if (elementType) {
+            this.action.doAction({
+                type: "ir.actions.act_window",
+                name: typeName,
+                res_model: "setdb.element",
+                view_mode: "list,form",
+                views: [[false, "list"], [false, "form"]],
+                domain: [["element_type", "=", elementType]],
+                target: "current",
+            });
+        }
+    }
+
+    onRecentQueryClick(query) {
+        this.action.doAction({
+            type: "ir.actions.client",
+            tag: "setdb_query_studio",
+            name: _t("Query Studio"),
+            params: { query_text: query.query_text },
+        });
+    }
+
     get statCards() {
         const s = this.state.stats;
         return [

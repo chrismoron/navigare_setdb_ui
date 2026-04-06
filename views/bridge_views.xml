@@ -27,6 +27,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_open_bridge_wizard" type="object"
+                            string="Bridge Setup Wizard" icon="fa-magic"/>
                     <button name="action_sync" type="object"
                             string="Sync Now" class="oe_highlight" icon="fa-refresh"/>
                     <button name="action_preview" type="object"

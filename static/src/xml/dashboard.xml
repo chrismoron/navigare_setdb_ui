@@ -30,7 +30,11 @@
                     <div class="row g-3 mb-4">
                         <t t-foreach="statCards" t-as="card" t-key="card.label">
                             <div class="col-lg-2 col-md-4 col-sm-6">
-                                <div class="setdb-panel p-3 text-center h-100">
+                                <div class="setdb-panel p-3 text-center h-100"
+                                     style="cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;"
+                                     t-on-click="() => this.onStatCardClick(card)"
+                                     t-on-mouseenter="(ev) => { ev.currentTarget.style.transform = 'translateY(-2px)'; ev.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }"
+                                     t-on-mouseleave="(ev) => { ev.currentTarget.style.transform = ''; ev.currentTarget.style.boxShadow = ''; }">
                                     <div class="mb-2">
                                         <i t-att-class="'fa ' + card.icon + ' fa-2x text-' + card.color"/>
                                     </div>
@@ -50,7 +54,11 @@
                                     Element Types
                                 </h6>
                                 <t t-foreach="typeBreakdown" t-as="item" t-key="item.label">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2"
+                                         style="cursor: pointer; padding: 4px 8px; border-radius: 4px;"
+                                         t-on-click="() => this.onTypeClick(item.label)"
+                                         t-on-mouseenter="(ev) => ev.currentTarget.style.backgroundColor = '#f0f0f0'"
+                                         t-on-mouseleave="(ev) => ev.currentTarget.style.backgroundColor = ''">
                                         <span class="small" t-esc="item.label"/>
                                         <span t-att-class="'setdb-badge ' + item.cls">
                                             <t t-esc="item.value"/>
@@ -151,7 +159,7 @@
                                     </thead>
                                     <tbody>
                                         <t t-foreach="state.recent_queries" t-as="q" t-key="q.id">
-                                            <tr>
+                                            <tr style="cursor: pointer;" t-on-click="() => this.onRecentQueryClick(q)">
                                                 <td>
                                                     <code class="small" t-esc="truncateQuery(q.query_text)"/>
                                                 </td>

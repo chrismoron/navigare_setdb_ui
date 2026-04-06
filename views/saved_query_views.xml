@@ -49,8 +49,18 @@
                         </group>
                     </group>
                     <separator string="Query"/>
+                    <div class="d-flex align-items-center mb-2">
+                        <button name="action_open_query_wizard" type="object"
+                                string="Query Builder" class="btn-secondary btn-sm"
+                                icon="fa-magic"/>
+                    </div>
                     <field name="query_text" widget="ace" options="{'mode': 'sql'}"/>
                     <separator string="Parameters Schema"/>
+                    <div class="d-flex align-items-center mb-2">
+                        <button name="action_open_parameter_wizard" type="object"
+                                string="Parameter Builder" class="btn-secondary btn-sm"
+                                icon="fa-cogs"/>
+                    </div>
                     <field name="parameters_json" widget="ace" options="{'mode': 'json'}"/>
                     <notebook>
                         <page string="Schedules">

@@ -36,6 +36,15 @@ class SetDBDataBridge(models.Model):
 
     _name_unique = models.Constraint('UNIQUE(name)', 'Bridge name must be unique.')
 
+    def action_open_bridge_wizard(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Bridge Setup Wizard',
+            'res_model': 'setdb.bridge.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
     def action_sync(self):
         """Manually trigger a sync through the bridge engine."""
         self.ensure_one()

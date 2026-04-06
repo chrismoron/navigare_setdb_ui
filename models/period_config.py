@@ -36,6 +36,15 @@ class SetDBPeriodConfig(models.Model):
     )
     active = fields.Boolean(default=True)
 
+    def action_open_period_wizard(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Period Generation Wizard',
+            'res_model': 'setdb.period.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
     # ------------------------------------------------------------------
     # Validation
     # ------------------------------------------------------------------

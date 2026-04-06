@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!--            1. QUERY BUILDER WIZARD                           -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_query_wizard_form" model="ir.ui.view">
+        <field name="name">setdb.query.wizard.form</field>
+        <field name="model">setdb.query.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Query Builder">
+                <header>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '1_operation'">Step 1: Operation</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '2_operands'">Step 2: Operands</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '3_options'">Step 3: Options</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '4_preview'">Step 4: Preview</span>
+                </header>
+                <sheet>
+                    <!-- Step 1: Select operation -->
+                    <group invisible="step != '1_operation'">
+                        <group string="Select Operation">
+                            <field name="operation"/>
+                            <field name="operation_description" readonly="1"
+                                   widget="text" nolabel="1" colspan="2"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 2: Operands -->
+                    <group invisible="step != '2_operands'">
+                        <group string="Operands">
+                            <field name="operand_1_id"
+                                   invisible="operation == 'find'"/>
+                            <field name="operand_2_id"
+                                   invisible="operation not in ('union', 'intersect', 'difference', 'symmetric_diff')"/>
+                            <field name="operand_3_id" string="Omega (Universe)"
+                                   invisible="operation != 'complement'"/>
+                            <field name="via_element_id"
+                                   invisible="operation != 'reachable'"/>
+                            <field name="max_depth"
+                                   invisible="operation != 'reachable'"/>
+                        </group>
+                        <group string="Find Criteria"
+                               invisible="operation != 'find'">
+                            <field name="find_field"/>
+                            <field name="find_operator"/>
+                            <field name="find_value"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 3: Options -->
+                    <group invisible="step != '3_options'">
+                        <group string="Options">
+                            <field name="max_depth"
+                                   invisible="operation not in ('flatten', 'reachable')"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 4: Preview -->
+                    <group invisible="step != '4_preview'">
+                        <group string="Generated Query" colspan="2">
+                            <field name="generated_query" readonly="1"
+                                   widget="text" nolabel="1" colspan="2"/>
+                        </group>
+                        <group string="Preview Results" colspan="2">
+                            <field name="preview_count" readonly="1"/>
+                            <field name="preview_result_text" readonly="1"
+                                   widget="text" nolabel="1" colspan="2"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Previous" type="object"
+                            name="action_prev_step" class="btn-secondary"
+                            icon="fa-arrow-left"
+                            invisible="step == '1_operation'"/>
+                    <button string="Next" type="object"
+                            name="action_next_step" class="btn-primary"
+                            icon="fa-arrow-right"
+                            invisible="step == '4_preview'"/>
+                    <button string="Execute" type="object"
+                            name="action_execute" class="btn-success"
+                            icon="fa-play"
+                            invisible="step != '4_preview'"/>
+                    <button string="Save as Query" type="object"
+                            name="action_save" class="btn-primary"
+                            icon="fa-save"
+                            invisible="step != '4_preview'"/>
+                    <button string="Copy to Clipboard" type="object"
+                            name="action_copy_to_clipboard" class="btn-secondary"
+                            icon="fa-clipboard"
+                            invisible="step != '4_preview'"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_query_wizard" model="ir.actions.act_window">
+        <field name="name">Query Builder</field>
+        <field name="res_model">setdb.query.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--            2. FORMULA BUILDER WIZARD                         -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_formula_wizard_form" model="ir.ui.view">
+        <field name="name">setdb.formula.wizard.form</field>
+        <field name="model">setdb.formula.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Formula Builder">
+                <sheet>
+                    <group>
+                        <group string="Formula Type">
+                            <field name="formula_type"/>
+                            <field name="cube_id" readonly="1" invisible="not cube_id"/>
+                        </group>
+                    </group>
+
+                    <!-- Simple Math -->
+                    <group invisible="formula_type != 'simple_math'">
+                        <group string="Simple Math Formula">
+                            <field name="row_ref_1_id"/>
+                            <field name="math_operator"/>
+                            <field name="row_ref_2_id"/>
+                        </group>
+                    </group>
+
+                    <!-- Row Reference -->
+                    <group invisible="formula_type != 'row_reference'">
+                        <group string="Row Reference">
+                            <field name="row_ref_1_id"/>
+                        </group>
+                    </group>
+
+                    <!-- Percentage -->
+                    <group invisible="formula_type != 'percentage'">
+                        <group string="Percentage Formula">
+                            <field name="row_ref_1_id"/>
+                            <field name="percentage_of_id"/>
+                        </group>
+                    </group>
+
+                    <!-- Custom -->
+                    <group invisible="formula_type != 'custom'">
+                        <group string="Custom Formula">
+                            <field name="custom_formula" widget="text"
+                                   placeholder="e.g. row:revenue - row:costs"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Display Options">
+                            <field name="axis"/>
+                            <field name="style"/>
+                        </group>
+                        <group string="Generated Formula">
+                            <field name="generated_formula" readonly="1" widget="text"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Preview" type="object"
+                            name="action_preview" class="btn-secondary"
+                            icon="fa-eye"/>
+                    <button string="Create Formula" type="object"
+                            name="action_create" class="btn-primary"
+                            icon="fa-plus"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_formula_wizard" model="ir.actions.act_window">
+        <field name="name">Formula Builder</field>
+        <field name="res_model">setdb.formula.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--            3. PARAMETER SCHEMA BUILDER WIZARD                -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_parameter_wizard_form" model="ir.ui.view">
+        <field name="name">setdb.parameter.wizard.form</field>
+        <field name="model">setdb.parameter.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Parameter Schema Builder">
+                <sheet>
+                    <group>
+                        <field name="saved_query_id" readonly="1"/>
+                    </group>
+                    <separator string="Parameters"/>
+                    <field name="line_ids">
+                        <list editable="bottom">
+                            <field name="param_name"/>
+                            <field name="param_type"/>
+                            <field name="param_label"/>
+                            <field name="param_default"/>
+                            <field name="param_required"/>
+                        </list>
+                    </field>
+                    <separator string="Generated JSON Schema"/>
+                    <field name="generated_json" readonly="1" widget="ace"
+                           options="{'mode': 'json'}"/>
+                </sheet>
+                <footer>
+                    <button string="Apply" type="object"
+                            name="action_apply" class="btn-primary"
+                            icon="fa-check"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_parameter_wizard" model="ir.actions.act_window">
+        <field name="name">Parameter Schema Builder</field>
+        <field name="res_model">setdb.parameter.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--            4. BRIDGE SETUP WIZARD                            -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_bridge_wizard_form" model="ir.ui.view">
+        <field name="name">setdb.bridge.wizard.form</field>
+        <field name="model">setdb.bridge.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Bridge Setup Wizard">
+                <header>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '1_source'">Step 1: Source</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '2_mappings'">Step 2: Mappings</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '3_dimensions'">Step 3: Dimensions</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '4_review'">Step 4: Review</span>
+                </header>
+                <sheet>
+                    <!-- Step 1: Source -->
+                    <group invisible="step != '1_source'">
+                        <group string="Bridge Source">
+                            <field name="name"/>
+                            <field name="source_model_id"/>
+                            <field name="domain_filter"
+                                   placeholder="e.g. [('active', '=', True)]"/>
+                        </group>
+                        <group string="Sync Settings">
+                            <field name="sync_mode"/>
+                            <field name="interval_number"
+                                   invisible="sync_mode != 'scheduled'"/>
+                            <field name="interval_type"
+                                   invisible="sync_mode != 'scheduled'"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 2: Field Mappings -->
+                    <group invisible="step != '2_mappings'">
+                        <group string="Field Mappings">
+                            <field name="name_field_id"
+                                   domain="[('model_id', '=', source_model_id)]"/>
+                            <field name="metadata_field_ids" widget="many2many_tags"
+                                   domain="[('model_id', '=', source_model_id)]"/>
+                            <field name="parent_field_id"
+                                   domain="[('model_id', '=', source_model_id)]"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 3: Dimensions -->
+                    <group invisible="step != '3_dimensions'">
+                        <group string="Dimension Configuration">
+                            <field name="date_field_id"
+                                   domain="[('model_id', '=', source_model_id)]"/>
+                            <field name="period_config_id"/>
+                            <field name="dimension_field_ids" widget="many2many_tags"
+                                   domain="[('model_id', '=', source_model_id)]"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 4: Review -->
+                    <group invisible="step != '4_review'">
+                        <group string="Review" colspan="2">
+                            <field name="review_text" readonly="1"
+                                   widget="text" nolabel="1" colspan="2"/>
+                            <field name="preview_count" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Previous" type="object"
+                            name="action_prev_step" class="btn-secondary"
+                            icon="fa-arrow-left"
+                            invisible="step == '1_source'"/>
+                    <button string="Next" type="object"
+                            name="action_next_step" class="btn-primary"
+                            icon="fa-arrow-right"
+                            invisible="step == '4_review'"/>
+                    <button string="Create Bridge" type="object"
+                            name="action_create_bridge" class="btn-success"
+                            icon="fa-plus"
+                            invisible="step != '4_review'"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bridge_wizard" model="ir.actions.act_window">
+        <field name="name">Bridge Setup Wizard</field>
+        <field name="res_model">setdb.bridge.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--            5. MEASURE BUILDER WIZARD                         -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_measure_wizard_form" model="ir.ui.view">
+        <field name="name">setdb.measure.wizard.form</field>
+        <field name="model">setdb.measure.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Measure Builder">
+                <sheet>
+                    <group>
+                        <group string="Measure Definition">
+                            <field name="cube_id" readonly="1" invisible="not cube_id"/>
+                            <field name="name"/>
+                            <field name="metadata_key"/>
+                            <field name="available_keys" readonly="1"
+                                   widget="text" string="Available Keys"/>
+                            <field name="aggregation"/>
+                            <field name="format_string"
+                                   placeholder="e.g. #,##0.00"/>
+                        </group>
+                        <group string="Conditional Formatting">
+                            <field name="conditional_format_type"/>
+                        </group>
+                    </group>
+
+                    <!-- Heatmap options -->
+                    <group invisible="conditional_format_type != 'heatmap'">
+                        <group string="Heatmap Colors">
+                            <field name="heatmap_min_color" widget="color"/>
+                            <field name="heatmap_max_color" widget="color"/>
+                        </group>
+                    </group>
+
+                    <!-- Threshold options -->
+                    <group invisible="conditional_format_type != 'threshold'">
+                        <group string="Threshold Settings">
+                            <field name="threshold_value"/>
+                            <field name="threshold_above_color" widget="color"/>
+                            <field name="threshold_below_color" widget="color"/>
+                        </group>
+                    </group>
+
+                    <!-- Custom rules -->
+                    <group invisible="conditional_format_type != 'custom'">
+                        <group string="Custom Rules">
+                            <field name="custom_rules_text" widget="text"
+                                   placeholder='[{"condition": ">1000", "style": "color:green"}]'/>
+                        </group>
+                    </group>
+
+                    <separator string="Generated Format JSON"/>
+                    <field name="generated_format_json" readonly="1" widget="text"/>
+                </sheet>
+                <footer>
+                    <button string="Preview" type="object"
+                            name="action_preview" class="btn-secondary"
+                            icon="fa-eye"/>
+                    <button string="Create Measure" type="object"
+                            name="action_create" class="btn-primary"
+                            icon="fa-plus"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_measure_wizard" model="ir.actions.act_window">
+        <field name="name">Measure Builder</field>
+        <field name="res_model">setdb.measure.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--            6. PERIOD GENERATION WIZARD                       -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_period_wizard_form" model="ir.ui.view">
+        <field name="name">setdb.period.wizard.form</field>
+        <field name="model">setdb.period.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Period Generation Wizard">
+                <header>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '1_basics'">Step 1: Basics</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '2_granularity'">Step 2: Granularity</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '3_preview'">Step 3: Preview</span>
+                    <span class="badge rounded-pill text-bg-primary"
+                          invisible="step != '4_generate'">Step 4: Generate</span>
+                </header>
+                <sheet>
+                    <!-- Step 1: Name -->
+                    <group invisible="step != '1_basics'">
+                        <group string="Period Configuration">
+                            <field name="name"/>
+                            <field name="fiscal_year_start_month"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 2: Range and granularity -->
+                    <group invisible="step != '2_granularity'">
+                        <group string="Year Range">
+                            <field name="year_start"/>
+                            <field name="year_end"/>
+                        </group>
+                        <group string="Granularity Levels">
+                            <field name="generate_quarters"/>
+                            <field name="generate_months"/>
+                            <field name="generate_weeks"/>
+                            <field name="generate_days"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 3: Preview -->
+                    <group invisible="step != '3_preview'">
+                        <group string="Preview" colspan="2">
+                            <field name="preview_text" readonly="1"
+                                   widget="text" nolabel="1" colspan="2"/>
+                            <field name="element_count_estimate" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Step 4: Confirmation -->
+                    <group invisible="step != '4_generate'">
+                        <group string="Confirmation" colspan="2">
+                            <div class="alert alert-info" colspan="2">
+                                <strong>Ready to generate periods.</strong>
+                                <br/>
+                                This will create approximately
+                                <field name="element_count_estimate" readonly="1" class="fw-bold"/>
+                                elements.
+                            </div>
+                            <field name="name" readonly="1"/>
+                            <field name="fiscal_year_start_month" readonly="1"/>
+                            <field name="year_start" readonly="1"/>
+                            <field name="year_end" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Previous" type="object"
+                            name="action_prev_step" class="btn-secondary"
+                            icon="fa-arrow-left"
+                            invisible="step == '1_basics'"/>
+                    <button string="Next" type="object"
+                            name="action_next_step" class="btn-primary"
+                            icon="fa-arrow-right"
+                            invisible="step in ('3_preview', '4_generate')"/>
+                    <button string="Next" type="object"
+                            name="action_next_step" class="btn-primary"
+                            icon="fa-arrow-right"
+                            invisible="step != '3_preview'"/>
+                    <button string="Generate" type="object"
+                            name="action_generate" class="btn-success"
+                            icon="fa-calendar"
+                            invisible="step != '4_generate'"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_period_wizard" model="ir.actions.act_window">
+        <field name="name">Period Generation Wizard</field>
+        <field name="res_model">setdb.period.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
