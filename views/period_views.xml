@@ -55,12 +55,37 @@
     </record>
 
     <!-- ============================================================ -->
+    <!--                      KANBAN VIEW                             -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_period_config_kanban" model="ir.ui.view">
+        <field name="name">setdb.period.config.kanban</field>
+        <field name="model">setdb.period.config</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold fs-5"/>
+                        <div class="mt-1">
+                            <span class="text-muted">Years:</span>
+                            <field name="year_start"/> - <field name="year_end"/>
+                        </div>
+                        <div class="mt-1">
+                            <span class="text-muted">Hierarchy:</span>
+                            <field name="hierarchy_id"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
     <!--                       ACTION                                 -->
     <!-- ============================================================ -->
     <record id="action_setdb_period_configs" model="ir.actions.act_window">
         <field name="name">Period Configurations</field>
         <field name="res_model">setdb.period.config</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Configure your first period hierarchy

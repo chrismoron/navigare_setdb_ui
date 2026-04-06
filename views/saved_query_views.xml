@@ -98,12 +98,115 @@
     </record>
 
     <!-- ============================================================ -->
+    <!--                      KANBAN VIEW                             -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_saved_query_kanban" model="ir.ui.view">
+        <field name="name">setdb.saved.query.kanban</field>
+        <field name="model">setdb.saved.query</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <templates>
+                    <t t-name="card" t-attf-class="#{record.is_shared.raw_value ? 'border-start border-success border-3' : ''}">
+                        <field name="name" class="fw-bold fs-5"/>
+                        <field name="description" class="text-muted"/>
+                        <div class="d-flex justify-content-between mt-2">
+                            <field name="tags" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <span class="badge bg-primary rounded-pill">
+                                <t t-out="record.execution_count.value"/> runs
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <span>Avg: <field name="avg_execution_time_ms"/> ms</span>
+                            <field name="last_executed" widget="date"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                      GRAPH VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_saved_query_graph" model="ir.ui.view">
+        <field name="name">setdb.saved.query.graph</field>
+        <field name="model">setdb.saved.query</field>
+        <field name="arch" type="xml">
+            <graph string="Query Execution Counts">
+                <field name="name"/>
+                <field name="execution_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                      PIVOT VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_saved_query_pivot" model="ir.ui.view">
+        <field name="name">setdb.saved.query.pivot</field>
+        <field name="model">setdb.saved.query</field>
+        <field name="arch" type="xml">
+            <pivot string="Saved Query Analysis">
+                <field name="name" type="row"/>
+                <field name="execution_count" type="measure"/>
+                <field name="avg_execution_time_ms" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--              QUERY HISTORY - GRAPH VIEW                      -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_query_history_graph" model="ir.ui.view">
+        <field name="name">setdb.query.history.graph</field>
+        <field name="model">setdb.query.history</field>
+        <field name="arch" type="xml">
+            <graph string="Query History" type="line">
+                <field name="executed_at" interval="day"/>
+                <field name="execution_time_ms" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--              QUERY HISTORY - PIVOT VIEW                      -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_query_history_pivot" model="ir.ui.view">
+        <field name="name">setdb.query.history.pivot</field>
+        <field name="model">setdb.query.history</field>
+        <field name="arch" type="xml">
+            <pivot string="Query History Analysis">
+                <field name="user_id" type="row"/>
+                <field name="executed_at" interval="month" type="col"/>
+                <field name="execution_time_ms" type="measure"/>
+                <field name="result_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--              QUERY HISTORY - CALENDAR VIEW                   -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_query_history_calendar" model="ir.ui.view">
+        <field name="name">setdb.query.history.calendar</field>
+        <field name="model">setdb.query.history</field>
+        <field name="arch" type="xml">
+            <calendar string="Query History" date_start="executed_at" color="user_id">
+                <field name="user_id"/>
+                <field name="execution_time_ms"/>
+                <field name="result_count"/>
+                <field name="status"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
     <!--                       ACTION                                 -->
     <!-- ============================================================ -->
     <record id="action_setdb_saved_queries" model="ir.actions.act_window">
         <field name="name">Saved Queries</field>
         <field name="res_model">setdb.saved.query</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form,graph,pivot</field>
         <field name="search_view_id" ref="view_setdb_saved_query_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -123,7 +226,7 @@
     <record id="action_setdb_query_history" model="ir.actions.act_window">
         <field name="name">Query History</field>
         <field name="res_model">setdb.query.history</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,form,graph,pivot,calendar</field>
     </record>
 
 </odoo>

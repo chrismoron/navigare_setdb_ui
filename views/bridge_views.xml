@@ -79,12 +79,56 @@
     </record>
 
     <!-- ============================================================ -->
+    <!--                      KANBAN VIEW                             -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_bridge_kanban" model="ir.ui.view">
+        <field name="name">setdb.data.bridge.kanban</field>
+        <field name="model">setdb.data.bridge</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold fs-5"/>
+                        <div class="mt-1">
+                            <span class="text-muted">Source:</span>
+                            <field name="source_model_id"/>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <field name="sync_mode" widget="badge"/>
+                            <span class="badge bg-secondary rounded-pill">
+                                <t t-out="record.last_sync_count.value"/> records
+                            </span>
+                        </div>
+                        <div class="mt-1 text-muted small">
+                            Last sync: <field name="last_sync" widget="date"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                      GRAPH VIEW                              -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_bridge_graph" model="ir.ui.view">
+        <field name="name">setdb.data.bridge.graph</field>
+        <field name="model">setdb.data.bridge</field>
+        <field name="arch" type="xml">
+            <graph string="Bridge Sync Counts">
+                <field name="name"/>
+                <field name="last_sync_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
     <!--                       ACTION                                 -->
     <!-- ============================================================ -->
     <record id="action_setdb_bridges" model="ir.actions.act_window">
         <field name="name">Data Bridges</field>
         <field name="res_model">setdb.data.bridge</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first data bridge

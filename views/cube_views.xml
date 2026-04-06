@@ -81,12 +81,40 @@
     </record>
 
     <!-- ============================================================ -->
+    <!--                      KANBAN VIEW                             -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_cube_kanban" model="ir.ui.view">
+        <field name="name">setdb.cube.kanban</field>
+        <field name="model">setdb.cube</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold fs-5"/>
+                        <div class="mt-1">
+                            <span class="text-muted">Rows:</span>
+                            <field name="row_hierarchy_id"/>
+                        </div>
+                        <div>
+                            <span class="text-muted">Cols:</span>
+                            <field name="column_hierarchy_id"/>
+                        </div>
+                        <div class="mt-2">
+                            <field name="measure_ids" widget="many2many_tags"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
     <!--                       ACTION                                 -->
     <!-- ============================================================ -->
     <record id="action_setdb_cubes" model="ir.actions.act_window">
         <field name="name">Cube Definitions</field>
         <field name="res_model">setdb.cube</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Define your first OLAP cube
