@@ -433,7 +433,7 @@
                                 <input type="text" class="form-control"
                                        t-att-value="operand"
                                        t-on-input="(ev) => this.onOperandChange(operand_index, ev)"
-                                       t-attf-placeholder="Element or set name #{{ operand_index + 1 }}"/>
+                                       t-att-placeholder="'Element or set name ' + (operand_index + 1)"/>
                                 <button t-if="canRemoveOperand"
                                         class="btn btn-outline-danger btn-sm"
                                         t-on-click="() => this.removeOperand(operand_index)">
