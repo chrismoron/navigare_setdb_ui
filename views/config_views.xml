@@ -10,19 +10,19 @@
         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-                <app data-string="SetDB UI" string="SetDB UI" groups="base.group_system">
+                <app data-string="SetDB UI" string="SetDB UI" name="setdb_ui" groups="base.group_system">
                     <block title="AI Assistant"
                            help="Configure the AI assistant for natural-language queries and suggestions.">
                         <setting string="API Key"
                                  help="API key for the external AI model provider.">
                             <div class="content-group">
                                 <div class="mt16">
-                                    <field name="setdb_ai_api_key" widget="password"/>
+                                    <field name="setdb_ai_api_key" password="True"/>
                                 </div>
                             </div>
                         </setting>
                         <setting string="AI Model"
-                                 help="Model identifier (e.g. gpt-4, claude-3).">
+                                 help="Model identifier (e.g. claude-sonnet-4-20250514).">
                             <div class="content-group">
                                 <div class="mt16">
                                     <field name="setdb_ai_model"/>
