@@ -2,6 +2,7 @@
 import { Component, useState, onMounted } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 
 import { SetDBCubeGrid } from "./cube_grid";
@@ -26,7 +27,6 @@ export class SetDBCubeExplorer extends Component {
     };
 
     setup() {
-        this.rpc = useService("rpc");
         this.notification = useService("notification");
 
         this.state = useState({
@@ -59,7 +59,7 @@ export class SetDBCubeExplorer extends Component {
 
     async loadAvailableCubes() {
         try {
-            const result = await this.rpc("/web/dataset/call_kw", {
+            const result = await rpc("/web/dataset/call_kw", {
                 model: "setdb.cube",
                 method: "search_read",
                 args: [[["active", "=", true]]],
@@ -81,7 +81,7 @@ export class SetDBCubeExplorer extends Component {
         if (!this.state.cube_id) return;
         this.state.is_loading = true;
         try {
-            const data = await this.rpc("/setdb_ui/cube/grid", {
+            const data = await rpc("/setdb_ui/cube/grid", {
                 cube_id: this.state.cube_id,
             });
             if (data.error) {
@@ -109,7 +109,7 @@ export class SetDBCubeExplorer extends Component {
 
     async loadAvailableHierarchies() {
         try {
-            const result = await this.rpc("/web/dataset/call_kw", {
+            const result = await rpc("/web/dataset/call_kw", {
                 model: "setdb.hierarchy",
                 method: "search_read",
                 args: [[]],
@@ -132,7 +132,7 @@ export class SetDBCubeExplorer extends Component {
         if (!this.state.cube_id) return;
         this.state.is_loading = true;
         try {
-            const data = await this.rpc("/setdb_ui/cube/drill", {
+            const data = await rpc("/setdb_ui/cube/drill", {
                 cube_id: this.state.cube_id,
                 axis,
                 element_id: elementId,
@@ -155,7 +155,7 @@ export class SetDBCubeExplorer extends Component {
         if (!this.state.cube_id) return;
         this.state.is_loading = true;
         try {
-            const data = await this.rpc("/setdb_ui/cube/drill", {
+            const data = await rpc("/setdb_ui/cube/drill", {
                 cube_id: this.state.cube_id,
                 axis,
                 element_id: elementId,
@@ -178,7 +178,7 @@ export class SetDBCubeExplorer extends Component {
         if (!this.state.cube_id) return;
         this.state.is_loading = true;
         try {
-            const data = await this.rpc("/setdb_ui/cube/pivot", {
+            const data = await rpc("/setdb_ui/cube/pivot", {
                 cube_id: this.state.cube_id,
             });
             if (!data.error) {
@@ -265,7 +265,7 @@ export class SetDBCubeExplorer extends Component {
         // Persist to server if a cube is selected
         if (this.state.cube_id && hier) {
             try {
-                await this.rpc("/web/dataset/call_kw", {
+                await rpc("/web/dataset/call_kw", {
                     model: "setdb.cube",
                     method: "write",
                     args: [[this.state.cube_id], { row_hierarchy_id: hier.id }],
@@ -282,7 +282,7 @@ export class SetDBCubeExplorer extends Component {
         this.state.col_hierarchy = hier;
         if (this.state.cube_id && hier) {
             try {
-                await this.rpc("/web/dataset/call_kw", {
+                await rpc("/web/dataset/call_kw", {
                     model: "setdb.cube",
                     method: "write",
                     args: [[this.state.cube_id], { column_hierarchy_id: hier.id }],
@@ -299,7 +299,7 @@ export class SetDBCubeExplorer extends Component {
         this.state.filter_hierarchies = hiers;
         if (this.state.cube_id) {
             try {
-                await this.rpc("/web/dataset/call_kw", {
+                await rpc("/web/dataset/call_kw", {
                     model: "setdb.cube",
                     method: "write",
                     args: [

@@ -1,6 +1,7 @@
 /** @odoo-module */
 import { Component, useState, useRef, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { SetDBSuggestion } from "./suggestion";
 
@@ -12,7 +13,6 @@ export class SetDBAssistant extends Component {
     };
 
     setup() {
-        this.rpc = useService("rpc");
         this.notification = useService("notification");
 
         this.state = useState({
@@ -44,7 +44,7 @@ export class SetDBAssistant extends Component {
         this._scrollToBottom();
 
         try {
-            const result = await this.rpc("/setdb_ui/ai/chat", {
+            const result = await rpc("/setdb_ui/ai/chat", {
                 message: text,
                 session_id: this.state.session_id,
                 context: {},

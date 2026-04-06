@@ -1,6 +1,7 @@
 /** @odoo-module */
 import { Component, useState, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 
 export class SetDBBridgeConfig extends Component {
@@ -11,7 +12,6 @@ export class SetDBBridgeConfig extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.rpc = useService("rpc");
         this.notification = useService("notification");
 
         this.state = useState({
@@ -121,7 +121,7 @@ export class SetDBBridgeConfig extends Component {
     async syncBridge(bridgeId) {
         this.state.is_syncing = true;
         try {
-            const result = await this.rpc("/setdb_ui/bridge/sync", {
+            const result = await rpc("/setdb_ui/bridge/sync", {
                 bridge_id: bridgeId,
             });
             if (result.error) {
