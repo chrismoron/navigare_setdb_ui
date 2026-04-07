@@ -9,3 +9,4 @@ from . import ai_session
 from . import ai_config
 from . import ui_profile
 from . import ui_shortcut
+from . import clustering

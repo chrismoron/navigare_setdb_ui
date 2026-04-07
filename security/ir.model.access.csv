@@ -38,3 +38,8 @@ access_parameter_wizard_line_user,setdb.parameter.wizard.line user,model_setdb_p
 access_bridge_wizard_user,setdb.bridge.wizard user,model_setdb_bridge_wizard,setdb.group_setdb_user,1,1,1,1
 access_measure_wizard_user,setdb.measure.wizard user,model_setdb_measure_wizard,setdb.group_setdb_user,1,1,1,1
 access_period_wizard_user,setdb.period.wizard user,model_setdb_period_wizard,setdb.group_setdb_user,1,1,1,1
+access_clustering_config_user,setdb.clustering.config user,model_setdb_clustering_config,setdb.group_setdb_user,1,1,1,0
+access_clustering_config_manager,setdb.clustering.config manager,model_setdb_clustering_config,setdb.group_setdb_manager,1,1,1,1
+access_clustering_result_user,setdb.clustering.result user,model_setdb_clustering_result,setdb.group_setdb_user,1,0,0,0
+access_clustering_result_manager,setdb.clustering.result manager,model_setdb_clustering_result,setdb.group_setdb_manager,1,1,1,1
+access_clustering_wizard_user,setdb.clustering.wizard user,model_setdb_clustering_wizard,setdb.group_setdb_user,1,1,1,1

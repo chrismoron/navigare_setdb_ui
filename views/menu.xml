@@ -70,6 +70,12 @@
               action="action_setdb_period_configs"
               sequence="20"/>
 
+    <menuitem id="setdb_ui_menu_olap_clustering"
+              name="Clustering"
+              parent="setdb_ui_menu_olap"
+              action="action_setdb_clustering_configs"
+              sequence="30"/>
+
     <!-- ============================================================ -->
     <!--                   DATA INTEGRATION                           -->
     <!-- ============================================================ -->

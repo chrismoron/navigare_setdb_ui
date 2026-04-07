@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!--              CLUSTERING CONFIG: LIST VIEW                    -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_clustering_config_list" model="ir.ui.view">
+        <field name="name">setdb.clustering.config.list</field>
+        <field name="model">setdb.clustering.config</field>
+        <field name="arch" type="xml">
+            <list string="Clustering Configurations">
+                <field name="name"/>
+                <field name="algorithm" widget="badge"
+                       decoration-info="algorithm == 'kmeans'"
+                       decoration-success="algorithm == 'dbscan'"
+                       decoration-warning="algorithm == 'hierarchical'"/>
+                <field name="source_hierarchy_id"/>
+                <field name="feature_keys"/>
+                <field name="last_result_id"/>
+                <field name="author_id" widget="many2one_avatar_user"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--              CLUSTERING CONFIG: KANBAN VIEW                  -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_clustering_config_kanban" model="ir.ui.view">
+        <field name="name">setdb.clustering.config.kanban</field>
+        <field name="model">setdb.clustering.config</field>
+        <field name="arch" type="xml">
+            <kanban string="Clustering Configurations">
+                <field name="name"/>
+                <field name="algorithm"/>
+                <field name="feature_keys"/>
+                <field name="last_result_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_kanban_card_header">
+                            <strong><field name="name"/></strong>
+                        </div>
+                        <div class="o_kanban_card_content">
+                            <div>
+                                <field name="algorithm" widget="badge"
+                                       decoration-info="algorithm == 'kmeans'"
+                                       decoration-success="algorithm == 'dbscan'"
+                                       decoration-warning="algorithm == 'hierarchical'"/>
+                            </div>
+                            <div class="text-muted mt-1">
+                                Features: <field name="feature_keys"/>
+                            </div>
+                            <div t-if="record.last_result_id.value" class="mt-1">
+                                Last run: <field name="last_result_id"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--              CLUSTERING CONFIG: FORM VIEW                   -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_clustering_config_form" model="ir.ui.view">
+        <field name="name">setdb.clustering.config.form</field>
+        <field name="model">setdb.clustering.config</field>
+        <field name="arch" type="xml">
+            <form string="Clustering Configuration">
+                <header>
+                    <button name="action_run" type="object"
+                            string="Run Clustering"
+                            class="btn-primary"
+                            icon="fa-play"/>
+                    <button name="action_open_wizard" type="object"
+                            string="Open Wizard"
+                            icon="fa-magic"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Configuration Name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Source">
+                            <field name="source_hierarchy_id"/>
+                            <field name="source_element_id"/>
+                            <field name="feature_keys" placeholder="key1, key2, key3"/>
+                        </group>
+                        <group string="Algorithm">
+                            <field name="algorithm" widget="radio"/>
+                            <field name="normalize"/>
+                        </group>
+                    </group>
+                    <group string="K-Means Parameters"
+                           invisible="algorithm != 'kmeans'">
+                        <group>
+                            <field name="k"/>
+                            <field name="max_iterations"/>
+                            <field name="random_seed"/>
+                        </group>
+                    </group>
+                    <group string="DBSCAN Parameters"
+                           invisible="algorithm != 'dbscan'">
+                        <group>
+                            <field name="epsilon"/>
+                            <field name="min_samples"/>
+                        </group>
+                    </group>
+                    <group string="Hierarchical Parameters"
+                           invisible="algorithm != 'hierarchical'">
+                        <group>
+                            <field name="n_clusters"/>
+                            <field name="linkage"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="description"/>
+                        </group>
+                        <group>
+                            <field name="author_id" widget="many2one_avatar_user"/>
+                            <field name="last_result_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Results" name="results">
+                            <field name="result_ids">
+                                <list string="Clustering Results" create="0">
+                                    <field name="name"/>
+                                    <field name="n_clusters"/>
+                                    <field name="n_elements"/>
+                                    <field name="n_noise"/>
+                                    <field name="silhouette_score"/>
+                                    <field name="inertia"/>
+                                    <field name="computed_at"/>
+                                    <field name="duration_seconds"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--              CLUSTERING RESULT: FORM VIEW                   -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_clustering_result_form" model="ir.ui.view">
+        <field name="name">setdb.clustering.result.form</field>
+        <field name="model">setdb.clustering.result</field>
+        <field name="arch" type="xml">
+            <form string="Clustering Result" create="0" edit="0">
+                <header>
+                    <button name="action_open_in_cube" type="object"
+                            string="Open in Cube"
+                            class="btn-primary"
+                            icon="fa-cube"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Statistics">
+                            <field name="n_clusters"/>
+                            <field name="n_elements"/>
+                            <field name="n_noise"/>
+                            <field name="silhouette_score"/>
+                            <field name="inertia"/>
+                            <field name="computed_at"/>
+                            <field name="duration_seconds"/>
+                        </group>
+                        <group string="Links">
+                            <field name="config_id"/>
+                            <field name="root_element_id"/>
+                            <field name="hierarchy_id"/>
+                            <field name="sigma_algebra_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Centroids" name="centroids">
+                            <field name="centroids_json" widget="text"/>
+                        </page>
+                        <page string="Cluster Sizes" name="sizes">
+                            <field name="cluster_sizes_json" widget="text"/>
+                        </page>
+                        <page string="Diagnostics" name="diagnostics">
+                            <field name="diagnostics_json" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--              CLUSTERING WIZARD: FORM VIEW                   -->
+    <!-- ============================================================ -->
+    <record id="view_setdb_clustering_wizard_form" model="ir.ui.view">
+        <field name="name">setdb.clustering.wizard.form</field>
+        <field name="model">setdb.clustering.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Clustering Wizard">
+                <div class="alert alert-info" role="alert">
+                    <strong>Step:</strong>
+                    <field name="step" readonly="1" widget="badge"/>
+                </div>
+
+                <!-- Step 1: Source -->
+                <group invisible="step != '1_source'" string="Select Source Data">
+                    <group>
+                        <field name="source_hierarchy_id"
+                               options="{'no_create': True}"/>
+                        <field name="source_element_id"
+                               options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <field name="feature_keys"
+                               placeholder="e.g. price, weight, rating"/>
+                        <field name="available_keys" readonly="1"/>
+                    </group>
+                </group>
+
+                <!-- Step 2: Algorithm -->
+                <group invisible="step != '2_algorithm'" string="Choose Algorithm">
+                    <group>
+                        <field name="algorithm" widget="radio"/>
+                    </group>
+                    <group>
+                        <field name="algorithm_description" readonly="1"
+                               widget="text"/>
+                    </group>
+                </group>
+
+                <!-- Step 3: Parameters -->
+                <group invisible="step != '3_parameters'" string="Configure Parameters">
+                    <group string="K-Means"
+                           invisible="algorithm != 'kmeans'">
+                        <field name="k"/>
+                        <field name="max_iterations"/>
+                        <field name="random_seed"/>
+                    </group>
+                    <group string="DBSCAN"
+                           invisible="algorithm != 'dbscan'">
+                        <field name="epsilon"/>
+                        <field name="min_samples"/>
+                    </group>
+                    <group string="Hierarchical"
+                           invisible="algorithm != 'hierarchical'">
+                        <field name="n_clusters"/>
+                        <field name="linkage"/>
+                    </group>
+                    <group string="General">
+                        <field name="normalize"/>
+                    </group>
+                </group>
+
+                <!-- Step 4: Preview -->
+                <group invisible="step != '4_preview'" string="Review and Run">
+                    <group>
+                        <field name="config_name" placeholder="My Clustering Config"
+                               required="step == '4_preview'"/>
+                    </group>
+                    <group>
+                        <field name="element_count" readonly="1"/>
+                        <field name="feature_count" readonly="1"/>
+                    </group>
+                    <group colspan="2">
+                        <field name="preview_summary" readonly="1"
+                               widget="text"/>
+                    </group>
+                </group>
+
+                <footer>
+                    <button name="action_prev_step" type="object"
+                            string="Previous"
+                            class="btn-secondary"
+                            invisible="step == '1_source'"/>
+                    <button name="action_next_step" type="object"
+                            string="Next"
+                            class="btn-primary"
+                            invisible="step == '4_preview'"/>
+                    <button name="action_run" type="object"
+                            string="Run Clustering"
+                            class="btn-primary"
+                            invisible="step != '4_preview'"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--                      ACTIONS                                -->
+    <!-- ============================================================ -->
+    <record id="action_setdb_clustering_configs" model="ir.actions.act_window">
+        <field name="name">Clustering Configurations</field>
+        <field name="res_model">setdb.clustering.config</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first clustering configuration
+            </p>
+            <p>
+                Use clustering to discover natural groupings in your SetDB data
+                based on element metadata features.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_setdb_clustering_wizard" model="ir.actions.act_window">
+        <field name="name">Clustering Wizard</field>
+        <field name="res_model">setdb.clustering.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
