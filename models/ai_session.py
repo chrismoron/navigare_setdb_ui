@@ -26,7 +26,7 @@ class SetDBAISession(models.Model):
             else:
                 record.name = 'AI Session (new)'
 
-    def send_message(self, content):
+    def send_message(self, content, context=None):
         """Send a user message and get an AI assistant response.
 
         1. Create user message record

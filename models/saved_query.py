@@ -69,7 +69,7 @@ class SetDBSavedQuery(models.Model):
             return result
         except Exception as e:
             elapsed = (time.monotonic() - t0) * 1000
-            self.env['setdb.query.history'].create({
+            self.env['setdb.query.history'].sudo().create({
                 'query_text': query_text,
                 'saved_query_id': self.id,
                 'user_id': self.env.uid,
@@ -77,6 +77,7 @@ class SetDBSavedQuery(models.Model):
                 'status': 'error',
                 'error_message': str(e),
             })
+            self.env.flush_all()
             raise
 
     def action_execute(self):

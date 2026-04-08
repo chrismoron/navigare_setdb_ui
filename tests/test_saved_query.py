@@ -90,9 +90,15 @@ class TestSavedQuery(TransactionCase):
             'name': 'Test Error Query',
             'query_text': 'INVALID_SYNTAX !@#$',
         })
-        with self.assertRaises(Exception):
+        # Use manual try/except instead of assertRaises to avoid
+        # Odoo's savepoint rollback which would undo the error history record.
+        raised = False
+        try:
             query.execute_query()
+        except Exception:
+            raised = True
 
+        self.assertTrue(raised, 'Expected an exception from invalid query')
         history = self.env['setdb.query.history'].search([
             ('saved_query_id', '=', query.id),
         ])

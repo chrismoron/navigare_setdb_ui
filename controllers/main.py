@@ -13,7 +13,7 @@ class SetDBUIController(http.Controller):
     # Query endpoints
     # ------------------------------------------------------------------
 
-    @http.route('/setdb_ui/query/execute', type='json', auth='user')
+    @http.route('/setdb_ui/query/execute', type='jsonrpc', auth='user')
     def query_execute(self, query_id=None, query_text=None, parameters=None):
         """Execute a saved query or ad-hoc query text with history logging.
 
@@ -57,7 +57,7 @@ class SetDBUIController(http.Controller):
             'execution_time_ms': round(elapsed, 2),
         }
 
-    @http.route('/setdb_ui/query/autocomplete', type='json', auth='user')
+    @http.route('/setdb_ui/query/autocomplete', type='jsonrpc', auth='user')
     def query_autocomplete(self, prefix='', limit=20):
         """Return matching element names for autocompletion.
 
@@ -78,7 +78,7 @@ class SetDBUIController(http.Controller):
             for el in elements
         ]
 
-    @http.route('/setdb_ui/query/keywords', type='json', auth='user')
+    @http.route('/setdb_ui/query/keywords', type='jsonrpc', auth='user')
     def query_keywords(self):
         """Return the list of SetQL keywords for syntax highlighting.
 
@@ -100,7 +100,7 @@ class SetDBUIController(http.Controller):
     # Cube endpoints
     # ------------------------------------------------------------------
 
-    @http.route('/setdb_ui/cube/grid', type='json', auth='user')
+    @http.route('/setdb_ui/cube/grid', type='jsonrpc', auth='user')
     def cube_grid(self, cube_id):
         """Compute the full OLAP grid for a cube.
 
@@ -115,7 +115,7 @@ class SetDBUIController(http.Controller):
             return {'error': 'Cube not found.'}
         return cube.compute_grid()
 
-    @http.route('/setdb_ui/cube/drill', type='json', auth='user')
+    @http.route('/setdb_ui/cube/drill', type='jsonrpc', auth='user')
     def cube_drill(self, cube_id, axis, element_id, direction='down'):
         """Drill down or up on a cube axis.
 
@@ -136,7 +136,7 @@ class SetDBUIController(http.Controller):
         else:
             return cube.roll_up(axis, element_id)
 
-    @http.route('/setdb_ui/cube/pivot', type='json', auth='user')
+    @http.route('/setdb_ui/cube/pivot', type='jsonrpc', auth='user')
     def cube_pivot(self, cube_id):
         """Swap rows and columns of a cube.
 
@@ -155,7 +155,7 @@ class SetDBUIController(http.Controller):
     # AI endpoint
     # ------------------------------------------------------------------
 
-    @http.route('/setdb_ui/ai/chat', type='json', auth='user')
+    @http.route('/setdb_ui/ai/chat', type='jsonrpc', auth='user')
     def ai_chat(self, message, session_id=None, context=None):
         """Send a message to the AI assistant.
 
@@ -189,16 +189,16 @@ class SetDBUIController(http.Controller):
             }
 
         return {
-            'response': result.get('response', ''),
+            'response': result.content or '',
             'session_id': session.id,
-            'suggestions': result.get('suggestions', []),
+            'suggestions': [result.suggested_query] if result.suggested_query else [],
         }
 
     # ------------------------------------------------------------------
     # Bridge endpoint
     # ------------------------------------------------------------------
 
-    @http.route('/setdb_ui/bridge/sync', type='json', auth='user')
+    @http.route('/setdb_ui/bridge/sync', type='jsonrpc', auth='user')
     def bridge_sync(self, bridge_id):
         """Trigger a data bridge synchronization.
 

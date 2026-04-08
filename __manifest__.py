@@ -97,5 +97,4 @@ smart materialization suggestions, and auto-tuning.
     },
     'installable': True,
     'application': False,
-    'license': 'LGPL-3',
 }
